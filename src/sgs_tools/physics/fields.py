@@ -25,3 +25,12 @@ def strain_from_vel(vel, space_dims, vec_dim, new_dim = 'c2', incompressible:boo
     if cache is not None:
         cache['gradvel'] = gradvel
     return sij
+
+def vertical_heat_flux(vert_vel, pot_temperature, hor_axes):
+    '''vertical heat flux w' theta' '''
+    w_prime = vert_vel - vert_vel.mean(hor_axes)
+    theta_prime = pot_temperature - pot_temperature.mean(hor_axes)
+    ans = w_prime * theta_prime
+    ans.name ='vertical_heat_flux'
+    ans['long_name'] = r"$w' \theta'$ "
+    return ans
