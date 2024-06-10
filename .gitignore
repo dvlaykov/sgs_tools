@@ -1,0 +1,13 @@
+#python
+**/__pycache__
+*.pyc
+
+#jupyter notebooks
+**/.ipynb_checkpoints
+
+#package building
+**/*.egg*
+
+#MacOS file sytem
+**/.DS_Store
+
