@@ -5,11 +5,6 @@ from typing import Union, List
 from .staggered_grid import interpolate_to_grid
 from .tensor_algebra import grad_vector, traceless, symmetrise
 
-def rate_of_strain(gradvel, dims = ('c1', 'c2')):
-    ''' 0.5 (grad_vel + grad_vel.transpose) '''
-    transpose_map = dict([dims, dims[::-1]])
-    sij = 0.5 * ( gradvel + gradvel.rename(transpose_map))
-    sij.name = 'Sij'
     return sij
 
 def strain_from_vel(vel, space_dims, vec_dim, new_dim = 'c2', incompressible:bool=True,
