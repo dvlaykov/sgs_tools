@@ -118,12 +118,12 @@ def restrict_ds(ds, fields=None):
     #rename dimensions fields for clarity
     dim_names = {'thlev_zsea_theta': 'z_theta',
                  'rholev_zsea_rho': 'z_rho',
-                 'latitude_t': 'x_theta',
-                 'longitude_t': 'y_theta',
-                 'latitude_cu': 'x_cu',
-                 'longitude_cu': 'y_cu',
-                 'latitude_cv': 'x_cv',
-                 'longitude_cv': 'y_cv',
+                 'latitude_t': 'y_theta',
+                 'longitude_t': 'x_theta',
+                 'latitude_cu': 'y_cu',
+                 'longitude_cu': 'x_cu',
+                 'latitude_cv': 'y_cv',
+                 'longitude_cv': 'x_cv',
                 }
     intersection = {k:v for k,v in dim_names.items() if k in ds}
     ds = ds.rename(intersection)
@@ -148,16 +148,16 @@ def unify_coords(ds, res):
 
     #rename dimensions/coords of staggered variables
     ds_stag = ds[stag_vars]
-    ds_stag['x_centre'] = xr.DataArray(x_centre, coords={'x_cu': ds.x_cu}, dims='x_cu', name='x_centre')
-    ds_stag['y_centre'] = xr.DataArray(x_centre, coords={'y_cv': ds.y_cv}, dims='y_cv', name='y_centre')
-    ds_stag['x_face'] = xr.DataArray(x_face, coords={'x_cv': ds.x_cv}, dims='x_cv', name='x_face')
-    ds_stag['y_face'] = xr.DataArray(x_face, coords={'y_cu': ds.y_cu}, dims='y_cu', name='y_face')
+    ds_stag['x_centre'] = xr.DataArray(x_centre, coords={'x_cv': ds.x_cv}, dims='x_cv', name='x_centre')
+    ds_stag['y_centre'] = xr.DataArray(x_centre, coords={'y_cu': ds.y_cu}, dims='y_cu', name='y_centre')
+    ds_stag['x_face'] = xr.DataArray(x_face, coords={'x_cu': ds.x_cu}, dims='x_cu', name='x_face')
+    ds_stag['y_face'] = xr.DataArray(x_face, coords={'y_cv': ds.y_cv}, dims='y_cv', name='y_face')
 
 
-    ds_stag = ds_stag.swap_dims({'x_cu':'x_centre',
-                                 'x_cv':'x_face',
-                                 'y_cu':'y_face',
-                                 'y_cv':'y_centre',
+    ds_stag = ds_stag.swap_dims({'x_cu':'x_face',
+                                 'x_cv':'x_centre',
+                                 'y_cu':'y_centre',
+                                 'y_cv':'y_face',
                       })
 
     #rename dimensions/coords of centred variables
