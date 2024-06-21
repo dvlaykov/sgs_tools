@@ -2,8 +2,8 @@ import xarray as xr
 from typing import Union, List, Dict
 
 
-def add_grid_spacing_coord(coord, new_dim):
-    ''' add a coordinate for the grid spacing'''
+def get_grid_spacing_coord(coord, new_dim):
+    ''' get a coordinate for the grid spacing'''
     current_name = coord.dims[0]
     return coord.diff(dim= current_name, n = 1).rename({current_name: new_dim})
 
