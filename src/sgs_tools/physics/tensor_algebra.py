@@ -1,5 +1,6 @@
 import xarray as xr
 import numpy as np
+from typing import Iterable
 
 
 # Vector algebra
@@ -10,13 +11,14 @@ def tensor_self_outer_product(arr):
     '''
     return (arr * arr.rename({'c1': 'c2'})).transpose('c1','c2',...)
 
-def trace(tensor, dims = ('c1', 'c2')):
+def trace(tensor, dims = ('c1', 'c2'), name = None):
     ''' trace along 2 dimesions '''
     assert( tensor[dims[0]].size == tensor[dims[1]].size ) # only for square arrays
     assert( len(dims) == 2 ) #only 2-dimensional trace
     diagonal =  tensor.sel({dims[0] : tensor[dims[1]]})
     tr = diagonal.sum(dims[1])
-    tr.name = 'Tr '+tensor.name
+    if name is not None:
+        tr.name = 'Tr '+tensor.name
     return tr
 
 #Make a tensor Traceless along 2 dimensions
@@ -38,36 +40,50 @@ def Frobenius_norm(tensor, tens_dims = ['c1', 'c2']):
     ''' Frobenius norm of a tensor: |A| = sqrt(Aij Aij) '''
     return np.sqrt(xr.dot(tensor, tensor, dims = tens_dims))
 
+def symmetrise(gradvec, dims = ('c1', 'c2'), name = None):
+    ''' 0.5 (grad_vec + grad_vec.transpose) '''
+    transpose_map = dict([dims, dims[::-1]])
+    sij = 0.5 * ( gradvec + gradvec.rename(transpose_map))
+    if name is not None:
+        sij.name = name
+    return sij
+
 # Vector calculus
-def grad_vector(vel, space_dims = [], new_dim_name = 'c2'):
-    ''' velocity gradient tensor -- centred 2nd order difference, reduced to 1st order at  boundaries
-        vel : xarray.DataArray, with spatial coordinates x{1,2,...,ndim}
+def grad_vector(vec, space_dims: Iterable[str], new_dim_name = 'c2', name = None):
+    ''' gradient tensor of a vector -- centred 2nd order difference, reduced to 1st order at  boundaries
+        vec : xarray.DataArray, with spatial coordinates `space_dims`
         space_dims : list of names of spatial dimensions w.r.t. which to take the gradient
         new_dim_name: string, name of new dimension
-        return : velocity gradient tensor (assuming cartesian geometry) as xarray.DataArray
+        return : gradient (assuming cartesian geometry) as xarray.DataArray
     '''
-    gradvel = []
+    gradvec = []
     for dim in space_dims:
-        gradvel.append(vel.differentiate(dim, edge_order=1))
-    gradvel = xr.concat(gradvel,
+        gradvec.append(vec.differentiate(dim, edge_order=1))
+    gradvec = xr.concat(gradvec,
                         dim = xr.DataArray(range(1,len(space_dims)+1),
                                            dims = [new_dim_name]))
-    gradvel.name = 'vel_gradient'
-    return gradvel
+    if not name is None:
+        gradvec.name = name
+    return gradvec
 
-def grad_vector_lin(vel, ndim = 3, new_dim_name = 'c2'):
-    ''' velocity gradient tensor -- 1st order backward finite-difference,
-        vel : xarray.DataArray, with spatial coordinates x{1,2,...,ndim}
-        ndim : number of spatial dimensions
+def grad_vector_lin(vec, space_dims: Iterable[str], new_dim_name = 'c2', name = None):
+    ''' gradient tensor of a vector -- 1st order backward finite-difference,
+        vec : xarray.DataArray, with spatial coordinates `space_dims`
+        space_dims : list of names of spatial dimensions w.r.t. which to take the gradient
         new_dim_name: string, name of new dimension
-        return : velocity gradient tensor (assuming cartesian geometry) as xarray.DataArray
+        return : gradient (assuming cartesian geometry) as xarray.DataArray
     '''
-    gradvel = []
-    for j in range(1, ndim+1):
-        gradvel.append( (vel - vel.shift({f'x{j}':-1}, fill_value=np.nan))/
-                        (vel[f'x{j}'] - vel[f'x{j}'].shift({f'x{j}':-1}, fill_value=np.nan))
+    gradvec = []
+    for dim in space_dims:
+        coord = vec[dim].astype(float) # just in case
+        val = vec.astype(float)
+
+        gradvec.append( (val - val.shift({dim:-1}, fill_value=np.nan))/
+                        (coord - coord.shift({dim:-1}, fill_value=np.nan))
                       )
-    gradvel = xr.concat(gradvel,
-                        dim = xr.DataArray(range(1,ndim+1), dims = [new_dim_name]))
-    gradvel.name = 'vel_gradient'
-    return gradvel
+    gradvec = xr.concat(gradvec,
+                        dim = xr.DataArray(range(1,len(space_dims)+1), dims = [new_dim_name]))
+    if not name is None:
+        gradvec.name = name
+    return gradvec
+

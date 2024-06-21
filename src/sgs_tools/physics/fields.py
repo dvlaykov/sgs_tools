@@ -2,8 +2,8 @@ import xarray as xr
 import numpy as np
 from typing import Union, List
 
-from .tensor_algebra import grad_vector, traceless
 from .staggered_grid import interpolate_to_grid
+from .tensor_algebra import grad_vector, traceless, symmetrise
 
 def rate_of_strain(gradvel, dims = ('c1', 'c2')):
     ''' 0.5 (grad_vel + grad_vel.transpose) '''
@@ -18,8 +18,8 @@ def strain_from_vel(vel, space_dims, vec_dim, new_dim = 'c2', incompressible:boo
         if cache is given will attempt to store intermediate calcualtion
         of gradvel in it
     '''
-    gradvel = grad_vector(vel, space_dims, new_dim)
-    sij = rate_of_strain(gradvel, (vec_dim, new_dim))
+    gradvel = grad_operator(vel, space_dims, new_dim)
+    sij = symmetrise(gradvel, (vec_dim, new_dim))
     if incompressible:
         sij = traceless(sij,  (vec_dim, new_dim))
     if cache is not None:
