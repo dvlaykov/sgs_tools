@@ -3,6 +3,65 @@ import numpy as np
 import os, re
 
 from pathlib import Path
+
+
+base_fields_dict = {'U_COMPNT_OF_WIND_AFTER_TIMESTEP' : 'u',
+                    'V_COMPNT_OF_WIND_AFTER_TIMESTEP' : 'v',
+                    'W_COMPNT_OF_WIND_AFTER_TIMESTEP' : 'w',
+                    'THETA_AFTER_TIMESTEP'     : 'theta',
+                    #'TEMPERATURE_ON_THETA_LEVELS' : 'T',
+                    # 'PRESSURE_AT_THETA_LEVELS_AFTER_TS' : 'P'
+                   }
+dynamic_SGS_dict = {'CS_SQUARED_AT_2_DELTA'    : 'cs2d',
+                    'CS_SQUARED_AT_4_DELTA'    : 'cs4d',
+                    'CS_THETA_AT_SCALE_2DELTA' : 'cs_theta_2d',
+                    'CS_THETA_AT_SCALE_4DELTA' : 'cs_theta_4d',
+                    }
+dynamic_SGS_diag_dict = {
+                    'LijMij_CONT_TENSORS'      : 'lm',
+                    'QijNij_CONT_TENSORS'      : 'qn',
+                    'MijMij_CONT_TENSORS'      : 'mm',
+                    'NijNij_CONT_TENSORS'      : 'nn',
+                    'HjTj_CONT_VECTORS'        : 'ht',
+                    'TjTj_CONT_VECTORS'        : 'tt',
+                    'RjFj_CONT_VECTORS'        : 'rf',
+                    'FjFj_CONT_VECTORS'        : 'ff',
+                    'SHEAR_AT_SCALE_2DELTA'    : 's2d',
+                    'SHEAR_AT_SCALE_4DELTA'    : 's4d',
+                    'D11_TENSOR_COMPONENT' : 'diag11',
+                    'D22_TENSOR_COMPONENT' : 'diag22',
+                    'D33_TENSOR_COMPONENT' : 'diag33',
+                    'D13_TENSOR_COMPONENT' : 'diag13',
+                    'D23_TENSOR_COMPONENT' : 'diag23',
+                    'D12_TENSOR_COMPONENT' : 'diag12',
+                    'Lagrangian_averaged_LijMij_tensors' : 'LM',
+                    'Lagrangian_averaged_MijMij_tensors' : 'MM',
+                    'Lagrangian_averaged_QijNij_tensors' : 'QN',
+                    'Lagrangian_averaged_NijNij_tensors' : 'NN',
+                    'Lagrangian_averaged_HjTj_vector' : 'HT',
+                    'Lagrangian_averaged_TjTj_vector' : 'TT',
+                    'Lagrangian_averaged_RjFj_vector' : 'RF',
+                    'Lagrangian_averaged_FjFj_vector' : 'FF',
+                    'Tdecorr_momentum'                : 'Tdecorr_momentum',
+                    'Tdecorr_heat'                    : 'Tdecorr_heat',
+                    }
+Smagorinsky_dict = {
+                    'SMAG__S__SHEAR_TERM_'     : 's_smag',
+                    'SMAG__VISC_M'             : 'SMAG__VISC_M',
+                    'SMAG__VISC_H'             : 'SMAG__VISC_H',
+                    'SHEAR_AT_SCALE_DELTA'     : 's',
+                    'MIXING_LENGTH_RNEUTML'    : 'csDelta',
+                    'CS_THETA'                 : 'cs_theta',
+                    }
+Water_dict = {
+                    'QCL_AFTER_TIMESTEP'              : 'q_l',
+                    'QCF_AFTER_TIMESTEP'              : 'q_i',
+                    'RAIN_MIXING_RATIO__mr__AFTER_TS' : 'rain',
+                    'GRAUPEL_MIXING_RATIO__mg__AFTER_TS' : 'graupel'
+                    }
+
+field_names_dict = (base_fields_dict | Water_dict | Smagorinsky_dict | dynamic_SGS_dict)
+
 #IO
 # open datasets
 def read_stash_files(base_dir, prefix, file_codes):
@@ -62,51 +121,7 @@ def restrict_ds(ds, fields=None):
         and rename vars, coords, dims
     '''
 
-    raw_fields = {'U_COMPNT_OF_WIND_AFTER_TIMESTEP' : 'u',
-                  'V_COMPNT_OF_WIND_AFTER_TIMESTEP' : 'v',
-                  'W_COMPNT_OF_WIND_AFTER_TIMESTEP' : 'w',
-                  'THETA_AFTER_TIMESTEP'     : 'theta',
-                  'LijMij_CONT_TENSORS'      : 'lm',
-                  'QijNij_CONT_TENSORS'      : 'qn',
-                  'MijMij_CONT_TENSORS'      : 'mm',
-                  'NijNij_CONT_TENSORS'      : 'nn',
-                  'HjTj_CONT_VECTORS'        : 'ht',
-                  'TjTj_CONT_VECTORS'        : 'tt',
-                  'RjFj_CONT_VECTORS'        : 'rf',
-                  'FjFj_CONT_VECTORS'        : 'ff',
-                  'SMAG__S__SHEAR_TERM_'     : 's_smag',
-                  'SMAG__VISC_M'             : 'SMAG__VISC_M',
-                  'SMAG__VISC_H'             : 'SMAG__VISC_H',
-                  'SHEAR_AT_SCALE_DELTA'     : 's',
-                  'SHEAR_AT_SCALE_2DELTA'    : 's2d',
-                  'SHEAR_AT_SCALE_4DELTA'    : 's4d',
-                  'MIXING_LENGTH_RNEUTML'    : 'csDelta',
-                  'CS_SQUARED_AT_2_DELTA'    : 'cs2d',
-                  'CS_SQUARED_AT_4_DELTA'    : 'cs4d',
-                  'CS_THETA'                 : 'cs_theta',
-                  'CS_THETA_AT_SCALE_2DELTA' : 'cs_theta_2d',
-                  'CS_THETA_AT_SCALE_4DELTA' : 'cs_theta_4d',
-                  'D11_TENSOR_COMPONENT' : 'diag11',
-                  'D22_TENSOR_COMPONENT' : 'diag22',
-                  'D33_TENSOR_COMPONENT' : 'diag33',
-                  'D13_TENSOR_COMPONENT' : 'diag13',
-                  'D23_TENSOR_COMPONENT' : 'diag23',
-                  'D12_TENSOR_COMPONENT' : 'diag12',
-                  'Lagrangian_averaged_LijMij_tensors' : 'LM',
-                  'Lagrangian_averaged_MijMij_tensors' : 'MM',
-                  'Lagrangian_averaged_QijNij_tensors' : 'QN',
-                  'Lagrangian_averaged_NijNij_tensors' : 'NN',
-                  'Lagrangian_averaged_HjTj_vector' : 'HT',
-                  'Lagrangian_averaged_TjTj_vector' : 'TT',
-                  'Lagrangian_averaged_RjFj_vector' : 'RF',
-                  'Lagrangian_averaged_FjFj_vector' : 'FF',
-                  'Tdecorr_momentum'                : 'Tdecorr_momentum',
-                  'Tdecorr_heat'                    : 'Tdecorr_heat',
-                  #'TEMPERATURE_ON_THETA_LEVELS' : 'T',
-                  # 'PRESSURE_AT_THETA_LEVELS_AFTER_TS' : 'P'
-                 }
-
-    intersection = {k:v for k,v in raw_fields.items() if k in ds}
+    intersection = {k:v for k,v in field_names_dict.items() if k in ds}
     if not fields is None:
         intersection = {k:v for k,v in intersection.items() if v in fields}
 
