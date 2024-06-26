@@ -20,6 +20,8 @@ def interpolate_to_grid(ds: Union[xr.DataArray, xr.Dataset],
         coord_map: dictionary of {existing_dimension_in_ds : target_coordinate_as_DataArray}
         drop_coords: flag to exclude spatial coordinates relying on removed dims from output
     '''
+    if isinstance(target_dims, str):
+        target_dims = [target_dims]
 
     if target_dims:
         #assume spatial coordinates have x, y, z
@@ -28,23 +30,46 @@ def interpolate_to_grid(ds: Union[xr.DataArray, xr.Dataset],
         z_dims = [z for z in ds.dims if z.startswith('z')]
         missing_coords = [dim for dim in target_dims if dim not in ds.coords]
         assert len(missing_coords) == 0, f'missing target coordinages {missing_coords} from input data'
-        coord_map    =   {x: ds[target_dims[0]] for x in x_dims if x != target_dims[0]}
-        coord_map.update({y: ds[target_dims[1]] for y in y_dims if y != target_dims[1]})
-        coord_map.update({z: ds[target_dims[2]] for z in z_dims if z != target_dims[2]})
+        x_target = [x for x in target_dims if x.startswith('x')]
+        y_target = [y for y in target_dims if y.startswith('y')]
+        z_target = [z for z in target_dims if z.startswith('z')]
+        assert len(x_target) == 1
+        x_target = x_target[0]
+        assert len(y_target) == 1
+        y_target = y_target[0]
+        assert len(z_target) == 1
+        z_target = z_target[0]
+
+        coord_map    =   {}
+        coord_map.update({x: ds[x_target] for x in x_dims if x != x_target})
+        coord_map.update({y: ds[y_target] for y in y_dims if y != y_target})
+        coord_map.update({z: ds[z_target] for z in z_dims if z != z_target})
+
     else:
         missing_dims = [dim for dim in coord_map.keys() if dim not in ds.dims]
         assert len(missing_dims) == 0, f'missing input dimensions {missing_dims} from input data'
 
-    print ({k:v.name for k, v in coord_map.items()})
+    # rename any possible dimensions that will clash with coord-map targets:
+    ds_interp = ds
+    c_map = {}
+    for d, c in coord_map.items():
+        if c.name == d:
+            ds_interp = ds_interp.rename({c.name:f'{c.name}_original'})
+            c_map[f'{c.name}_original'] = coord_map[d]
+        else:
+            c_map[d] = coord_map[d]
+
+    # drop any coordinates based on replaced dimensions
+    drop_coords_list = []
     if drop_coords:
-        drop_coords_list = [coord for coord in ds.coords if ds[coord].dims and ds[coord].dims[0] in coord_map]
-    else:
-        drop_coords_list = []
+        for coord in ds_interp.coords:
+            dims = ds_interp[coord].dims
+            if dims and dims[0] in c_map:
+                drop_coords_list.append(dims[0])
 
     #interpolate all fields to target grid and drop coordinates
-    ds_centred = ds.interp(coord_map, method = "linear", assume_sorted = True, ).drop(drop_coords_list)
-
-    return ds_centred
+    ds_interp = ds_interp.interp(c_map, method = "linear", assume_sorted = True).drop(drop_coords_list)
+    return ds_interp
 
 
 def compose_vector_components_on_grid(components: List[xr.DataArray],
