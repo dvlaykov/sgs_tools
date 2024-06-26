@@ -2,6 +2,7 @@ import xarray as xr
 import numpy as np
 import os, re
 
+from pathlib import Path
 #IO
 # open datasets
 def read_stash_files(base_dir, prefix, file_codes):
