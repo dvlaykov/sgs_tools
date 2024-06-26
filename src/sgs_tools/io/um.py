@@ -20,6 +20,15 @@ Water_dict = {
                     'SPECIFIC_HUMIDITY_AFTER_TIMESTEP' : 'q_v'
                     }
 
+Smagorinsky_dict = {
+                    'SMAG__S__SHEAR_TERM_'     : 's_smag',
+                    'SMAG__VISC_M'             : 'SMAG__VISC_M',
+                    'SMAG__VISC_H'             : 'SMAG__VISC_H',
+                    'SHEAR_AT_SCALE_DELTA'     : 's',
+                    'MIXING_LENGTH_RNEUTML'    : 'csDelta',
+                    'CS_THETA'                 : 'cs_theta',
+                    'TURBULENT_KINETIC_ENERGY' : 'tke'
+                    }
 dynamic_SGS_dict = {'CS_SQUARED_AT_2_DELTA'    : 'cs2d',
                     'CS_SQUARED_AT_4_DELTA'    : 'cs4d',
                     'CS_THETA_AT_SCALE_2DELTA' : 'cs_theta_2d',
@@ -52,14 +61,6 @@ dynamic_SGS_diag_dict = {
                     'Lagrangian_averaged_FjFj_vector' : 'FF',
                     'Tdecorr_momentum'                : 'Tdecorr_momentum',
                     'Tdecorr_heat'                    : 'Tdecorr_heat',
-                    }
-Smagorinsky_dict = {
-                    'SMAG__S__SHEAR_TERM_'     : 's_smag',
-                    'SMAG__VISC_M'             : 'SMAG__VISC_M',
-                    'SMAG__VISC_H'             : 'SMAG__VISC_H',
-                    'SHEAR_AT_SCALE_DELTA'     : 's',
-                    'MIXING_LENGTH_RNEUTML'    : 'csDelta',
-                    'CS_THETA'                 : 'cs_theta',
                     }
 
 field_names_dict = (base_fields_dict | Water_dict | Smagorinsky_dict | dynamic_SGS_dict)
