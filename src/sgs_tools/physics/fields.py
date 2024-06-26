@@ -1,13 +1,14 @@
 import xarray as xr
 import numpy as np
-from typing import Union, List
+from typing import Union, Callable
 
-from .staggered_grid import interpolate_to_grid
 from .tensor_algebra import grad_vector, traceless, symmetrise
 
-    return sij
-
-def strain_from_vel(vel, space_dims, vec_dim, new_dim = 'c2', incompressible:bool=True,
+def strain_from_vel(vel:Union[xr.Dataset, Iterable[xr.DataArray]],
+                    space_dims: Iterable[str],
+                    vec_dim: str,
+                    new_dim = 'c2', incompressible:bool=True,
+                    grad_operator: Callable = grad_vector,
             cache: Union[None, xr.Dataset] = None) -> xr.DataArray:
     ''' compute rate of strain from velocity
         if cache is given will attempt to store intermediate calcualtion
