@@ -4,7 +4,7 @@ import os, re
 
 #IO
 # open datasets
-def read_stash_files(base_dir, rose_suite, resolution, file_codes):
+def read_stash_files(base_dir, prefix, file_codes):
     ''' combine a list of output Stash files
         base_dir: basic directory
         rose_suite: the name of the suite wihtout the "u-" prefix
@@ -14,7 +14,8 @@ def read_stash_files(base_dir, rose_suite, resolution, file_codes):
     '''
     datasets = []
     for c in file_codes:
-        file = f"{base_dir}/{rose_suite.split('_')[0]}_{resolution}a_p{c}000.nc"
+
+        file = Path(base_dir) / f'{prefix}_p{c}000.nc'
         print (f"Reading {file}")
         datasets.append(xr.open_dataset(file))
     return xr.merge(datasets)
