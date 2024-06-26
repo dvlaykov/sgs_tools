@@ -113,7 +113,7 @@ def rename_variables(ds):
     for tsuffix in '', '_0':
         delta_t = np.rint((ds[tname+tsuffix] - torigin)/np.timedelta64(1, 'm')).astype(int)
         ds = ds.assign_coords({'t'+tsuffix : (tname+tsuffix, delta_t.data)})
-        ds['t'+tsuffix].attrs  = {'standard_name': 'time', 'axis': 'T', 'unit' : '15 min'}
+        ds['t'+tsuffix].attrs  = {'standard_name': 'time', 'axis': 'T', 'unit' : 'min'}
         ds = ds.swap_dims({tname+tsuffix: 't'+tsuffix})
     return ds
 
