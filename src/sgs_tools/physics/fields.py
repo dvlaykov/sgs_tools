@@ -1,6 +1,6 @@
 import xarray as xr
 import numpy as np
-from typing import Union, Callable
+from typing import Union, Callable, Iterable
 
 from .tensor_algebra import grad_vector, traceless, symmetrise
 
