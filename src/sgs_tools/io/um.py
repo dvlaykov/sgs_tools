@@ -12,6 +12,14 @@ base_fields_dict = {'U_COMPNT_OF_WIND_AFTER_TIMESTEP' : 'u',
                     #'TEMPERATURE_ON_THETA_LEVELS' : 'T',
                     # 'PRESSURE_AT_THETA_LEVELS_AFTER_TS' : 'P'
                    }
+Water_dict = {
+                    'CLD_LIQ_MIXING_RATIO__mcl__AFTER_TS' : 'q_l',
+                    'CLD_ICE_MIXING_RATIO__mcf__AFTER_TS' : 'q_i',
+                    'LARGE_SCALE_RAINFALL_RATE____KG_M2_S' : 'rain',
+                    'GRAUPEL_MIXING_RATIO__mg__AFTER_TS' : 'q_g',
+                    'SPECIFIC_HUMIDITY_AFTER_TIMESTEP' : 'q_v'
+                    }
+
 dynamic_SGS_dict = {'CS_SQUARED_AT_2_DELTA'    : 'cs2d',
                     'CS_SQUARED_AT_4_DELTA'    : 'cs4d',
                     'CS_THETA_AT_SCALE_2DELTA' : 'cs_theta_2d',
@@ -52,12 +60,6 @@ Smagorinsky_dict = {
                     'SHEAR_AT_SCALE_DELTA'     : 's',
                     'MIXING_LENGTH_RNEUTML'    : 'csDelta',
                     'CS_THETA'                 : 'cs_theta',
-                    }
-Water_dict = {
-                    'QCL_AFTER_TIMESTEP'              : 'q_l',
-                    'QCF_AFTER_TIMESTEP'              : 'q_i',
-                    'RAIN_MIXING_RATIO__mr__AFTER_TS' : 'rain',
-                    'GRAUPEL_MIXING_RATIO__mg__AFTER_TS' : 'graupel'
                     }
 
 field_names_dict = (base_fields_dict | Water_dict | Smagorinsky_dict | dynamic_SGS_dict)
