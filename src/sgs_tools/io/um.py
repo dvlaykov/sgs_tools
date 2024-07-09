@@ -1,6 +1,7 @@
 import xarray as xr
 import numpy as np
 import os, re
+from typing import Iterable
 
 from pathlib import Path
 
@@ -68,7 +69,7 @@ field_names_dict = base_fields_dict | Water_dict | Smagorinsky_dict | dynamic_SG
 
 # IO
 # open datasets
-def read_stash_files(base_dir, prefix, file_codes):
+def read_stash_files(base_dir:Path|str, prefix:str, file_codes:Iterable[str]) -> xr.Dataset:
     """combine a list of output Stash files
     base_dir: basic directory
     rose_suite: the name of the suite wihtout the "u-" prefix
@@ -86,17 +87,17 @@ def read_stash_files(base_dir, prefix, file_codes):
 
 
 # Pre-process input UM arrays
-def rename_variables(ds):
+def rename_variables(ds:xr.Dataset) -> xr.Dataset:
     """rename stash variables to something meaningful, i.e. long_name"""
 
-    def varname_str(varStr):
+    def varname_str(varStr:str):
         """replace special characters in varStr with "_" """
         return re.sub(r"\W|^(?=\d)", "_", varStr)
 
     varname_dict = {}
     for var in ds:
         lname = ds[var].attrs.get("long_name", "None").rstrip("|").rstrip()
-        if "STASH" in var and lname is not None:
+        if "STASH" in str(var) and lname is not None:
             ds[var].attrs["original_vname"] = var
             varname_dict[var] = varname_str(lname)
     ds = ds.rename(varname_dict)
@@ -125,7 +126,7 @@ def rename_variables(ds):
     return ds
 
 
-def restrict_ds(ds, fields=None):
+def restrict_ds(ds: xr.Dataset, fields=None) -> xr.Dataset:
     """restrict the dataset to fields of interest (if fields=None) or to
     a pre-selected list of fields]
 
@@ -161,7 +162,7 @@ def restrict_ds(ds, fields=None):
 
 # unify coordinates and implement correct x-spacing
 # xarray doesn't handle duplicate dimensions well, so use clunkily split-rename-merge
-def unify_coords(ds, res):
+def unify_coords(ds: xr.Dataset, res:int) -> xr.Dataset:
     """
     unify coordinate names
     implement correct x-spacing using res, assume res is given in meters
@@ -216,7 +217,7 @@ def unify_coords(ds, res):
     return ds
 
 
-def compose_diagnostic_tensor(ds):
+def compose_diagnostic_tensor(ds: xr.Dataset) -> xr.Dataset:
     diag_ij = xr.concat(
         [
             xr.concat([ds.diag11, ds.diag12, ds.diag13], "c1"),

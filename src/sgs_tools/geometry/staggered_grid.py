@@ -1,6 +1,6 @@
 import xarray as xr
 from numpy import nan
-from typing import Union, List, Dict, Iterable
+from typing import Union, List, Dict
 
 
 def get_grid_spacing_coord(coord, new_dim):
@@ -12,7 +12,7 @@ def get_grid_spacing_coord(coord, new_dim):
 def interpolate_to_grid(
     ds: xr.DataArray | xr.Dataset,
     target_dims: List[str] = [],
-    coord_map: None | Dict[str, xr.DataArray] = None,
+    coord_map: Dict[str, xr.DataArray] = {},
     drop_coords: bool = True,
 ) -> Union[xr.DataArray, xr.Dataset]:
     """Spatial interpolation to a target_grid
@@ -172,8 +172,8 @@ def diff_lin_on_grid(ds, dim, periodic_field=False):
 
 def grad_on_cart_grid(
     ds: xr.DataArray,
-    space_dims: Iterable[str],
-    periodic_field: Iterable[bool] = [False, False, False],
+    space_dims: List[str],
+    periodic_field: List[bool] = [False, False, False],
 ) -> xr.Dataset:
     """differentiate a scalar with respect to space dims on staggered grid
     BCs: coordinate is extrapolated with the neighbouring cell spacing;
@@ -196,9 +196,9 @@ def grad_on_cart_grid(
 
 def grad_vec_on_grid(
     ds: xr.Dataset,
-    target_dims: Iterable[str] = ["x_centre", "y_centre", "z_centre"],
-    new_dim_name: Iterable[str] = ["c1", "c2"],
-    name: Union[str, None] = None,
+    target_dims: List[str] = ["x_centre", "y_centre", "z_centre"],
+    new_dim_name: List[str] = ["c1", "c2"],
+    name: str | None = None,
 ) -> xr.DataArray:
     """computes gradient of a vector described onto target dimensions
     ds: should be a dataset which only contains the components of the vector in sorted order and target coordinates.
@@ -206,8 +206,8 @@ def grad_vec_on_grid(
     new_dim_name: the names of the new dimensions: [vector component, differential component]
     name : name for output dataarray (optional)
     """
-    vec_name = new_dim_name[0]
-    d_name = new_dim_name[1]
+    #unpack new_dim_name
+    vec_name, d_name = new_dim_name
     gradvec_comp = {}
 
     for i, f in enumerate(ds):

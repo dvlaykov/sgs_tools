@@ -1,28 +1,29 @@
 import xarray as xr
 import numpy as np
-from typing import Iterable
+from typing import List
 
 
 # Vector calculus
-def grad_vector(vec, space_dims: Iterable[str], new_dim_name="c2", name=None):
+def grad_vector(vec:xr.DataArray, space_dims: List[str], new_dim_name:str="c2", name=None) -> xr.DataArray:
     """gradient tensor of a vector -- centred 2nd order difference, reduced to 1st order at  boundaries
     vec : xarray.DataArray, with spatial coordinates `space_dims`
     space_dims : list of names of spatial dimensions w.r.t. which to take the gradient
     new_dim_name: string, name of new dimension
     return : gradient (assuming cartesian geometry) as xarray.DataArray
     """
+
     gradvec = []
     for dim in space_dims:
         gradvec.append(vec.differentiate(dim, edge_order=1))
-    gradvec = xr.concat(
+    gradvec_xarr = xr.concat(
         gradvec, dim=xr.DataArray(range(1, len(space_dims) + 1), dims=[new_dim_name])
     )
     if not name is None:
-        gradvec.name = name
-    return gradvec
+        gradvec_xarr.name = name
+    return gradvec_xarr
 
 
-def grad_vector_lin(vec, space_dims: Iterable[str], new_dim_name="c2", name=None):
+def grad_vector_lin(vec:xr.DataArray, space_dims: List[str], new_dim_name:str="c2", name=None) -> xr.DataArray:
     """gradient tensor of a vector -- 1st order backward finite-difference,
     vec : xarray.DataArray, with spatial coordinates `space_dims`
     space_dims : list of names of spatial dimensions w.r.t. which to take the gradient
@@ -38,9 +39,9 @@ def grad_vector_lin(vec, space_dims: Iterable[str], new_dim_name="c2", name=None
             (val - val.shift({dim: -1}, fill_value=np.nan))
             / (coord - coord.shift({dim: -1}, fill_value=np.nan))
         )
-    gradvec = xr.concat(
+    gradvec_xarr = xr.concat(
         gradvec, dim=xr.DataArray(range(1, len(space_dims) + 1), dims=[new_dim_name])
     )
     if not name is None:
-        gradvec.name = name
-    return gradvec
+        gradvec_xarr.name = name
+    return gradvec_xarr
