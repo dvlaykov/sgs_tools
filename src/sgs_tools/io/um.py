@@ -80,7 +80,7 @@ def read_stash_files(base_dir, prefix, file_codes):
 
         file = Path(base_dir) / f'{prefix}_p{c}000.nc'
         print (f"Reading {file}")
-        datasets.append(xr.open_dataset(file))
+        datasets.append(xr.open_dataset(file, chunks ={}))
     return xr.merge(datasets)
 
 
