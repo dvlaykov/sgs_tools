@@ -2,7 +2,8 @@ import xarray as xr
 import numpy as np
 from typing import Union, Callable, Iterable
 
-from .tensor_algebra import grad_vector, traceless, symmetrise
+from .tensor_algebra import traceless, symmetrise
+from .vector_calculus import grad_vector
 
 def strain_from_vel(vel:Union[xr.Dataset, Iterable[xr.DataArray]],
                     space_dims: Iterable[str],
