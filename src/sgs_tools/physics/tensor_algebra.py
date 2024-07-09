@@ -12,7 +12,9 @@ def tensor_self_outer_product(arr: xr.DataArray) -> xr.DataArray:
     return (arr * arr.rename({"c1": "c2"})).transpose("c1", "c2", ...)
 
 
-def trace(tensor:xr.DataArray, dims: List[str]=["c1", "c2"], name=None) -> xr.DataArray:
+def trace(
+    tensor: xr.DataArray, dims: List[str] = ["c1", "c2"], name=None
+) -> xr.DataArray:
     """trace along 2 dimesions"""
     assert tensor[dims[0]].size == tensor[dims[1]].size  # only for square arrays
     assert len(dims) == 2  # only 2-dimensional trace
@@ -24,7 +26,7 @@ def trace(tensor:xr.DataArray, dims: List[str]=["c1", "c2"], name=None) -> xr.Da
 
 
 # Make a tensor Traceless along 2 dimensions
-def traceless(tensor:xr.DataArray, dims: List[str]=["c1", "c2"]) -> xr.DataArray:
+def traceless(tensor: xr.DataArray, dims: List[str] = ["c1", "c2"]) -> xr.DataArray:
     """returns a traceless version of tensor
     bug/unexpected behaviour when nan in trace
     """
@@ -39,12 +41,16 @@ def traceless(tensor:xr.DataArray, dims: List[str]=["c1", "c2"]) -> xr.DataArray
     return traceless
 
 
-def Frobenius_norm(tensor: xr.DataArray, tens_dims: List[str]=["c1", "c2"]) -> xr.DataArray:
+def Frobenius_norm(
+    tensor: xr.DataArray, tens_dims: List[str] = ["c1", "c2"]
+) -> xr.DataArray:
     """Frobenius norm of a tensor: |A| = sqrt(Aij Aij)"""
     return np.sqrt(xr.dot(tensor, tensor, dims=tens_dims))
 
 
-def symmetrise(gradvec: xr.DataArray, dims: List[str]=["c1", "c2"], name=None) -> xr.DataArray:
+def symmetrise(
+    gradvec: xr.DataArray, dims: List[str] = ["c1", "c2"], name=None
+) -> xr.DataArray:
     """0.5 (grad_vec + grad_vec.transpose)"""
     transpose_map = dict([dims, dims[::-1]])
     sij = 0.5 * (gradvec + gradvec.rename(transpose_map))

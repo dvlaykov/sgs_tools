@@ -4,7 +4,9 @@ from typing import List
 
 
 # Vector calculus
-def grad_vector(vec:xr.DataArray, space_dims: List[str], new_dim_name:str="c2", name=None) -> xr.DataArray:
+def grad_vector(
+    vec: xr.DataArray, space_dims: List[str], new_dim_name: str = "c2", name=None
+) -> xr.DataArray:
     """gradient tensor of a vector -- centred 2nd order difference, reduced to 1st order at  boundaries
     vec : xarray.DataArray, with spatial coordinates `space_dims`
     space_dims : list of names of spatial dimensions w.r.t. which to take the gradient
@@ -23,7 +25,9 @@ def grad_vector(vec:xr.DataArray, space_dims: List[str], new_dim_name:str="c2", 
     return gradvec_xarr
 
 
-def grad_vector_lin(vec:xr.DataArray, space_dims: List[str], new_dim_name:str="c2", name=None) -> xr.DataArray:
+def grad_vector_lin(
+    vec: xr.DataArray, space_dims: List[str], new_dim_name: str = "c2", name=None
+) -> xr.DataArray:
     """gradient tensor of a vector -- 1st order backward finite-difference,
     vec : xarray.DataArray, with spatial coordinates `space_dims`
     space_dims : list of names of spatial dimensions w.r.t. which to take the gradient

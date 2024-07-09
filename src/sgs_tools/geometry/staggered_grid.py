@@ -206,7 +206,7 @@ def grad_vec_on_grid(
     new_dim_name: the names of the new dimensions: [vector component, differential component]
     name : name for output dataarray (optional)
     """
-    #unpack new_dim_name
+    # unpack new_dim_name
     vec_name, d_name = new_dim_name
     gradvec_comp = {}
 

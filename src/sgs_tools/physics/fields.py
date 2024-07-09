@@ -10,7 +10,7 @@ def strain_from_vel(
     vel: Union[xr.Dataset, Iterable[xr.DataArray]],
     space_dims: Iterable[str],
     vec_dim: str,
-    new_dim: str="c2",
+    new_dim: str = "c2",
     incompressible: bool = True,
     grad_operator: Callable = grad_vector,
     cache: Union[None, xr.Dataset] = None,
@@ -28,9 +28,9 @@ def strain_from_vel(
     return sij
 
 
-def vertical_heat_flux(vert_vel: xr.DataArray,
-                       pot_temperature: xr.DataArray,
-                       hor_axes: Iterable[str]) -> xr.DataArray:
+def vertical_heat_flux(
+    vert_vel: xr.DataArray, pot_temperature: xr.DataArray, hor_axes: Iterable[str]
+) -> xr.DataArray:
     """vertical heat flux w' theta'"""
     w_prime = vert_vel - vert_vel.mean(hor_axes)
     theta_prime = pot_temperature - pot_temperature.mean(hor_axes)

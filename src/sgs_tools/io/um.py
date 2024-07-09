@@ -69,7 +69,9 @@ field_names_dict = base_fields_dict | Water_dict | Smagorinsky_dict | dynamic_SG
 
 # IO
 # open datasets
-def read_stash_files(base_dir:Path|str, prefix:str, file_codes:Iterable[str]) -> xr.Dataset:
+def read_stash_files(
+    base_dir: Path | str, prefix: str, file_codes: Iterable[str]
+) -> xr.Dataset:
     """combine a list of output Stash files
     base_dir: basic directory
     rose_suite: the name of the suite wihtout the "u-" prefix
@@ -87,10 +89,10 @@ def read_stash_files(base_dir:Path|str, prefix:str, file_codes:Iterable[str]) ->
 
 
 # Pre-process input UM arrays
-def rename_variables(ds:xr.Dataset) -> xr.Dataset:
+def rename_variables(ds: xr.Dataset) -> xr.Dataset:
     """rename stash variables to something meaningful, i.e. long_name"""
 
-    def varname_str(varStr:str):
+    def varname_str(varStr: str):
         """replace special characters in varStr with "_" """
         return re.sub(r"\W|^(?=\d)", "_", varStr)
 
@@ -162,7 +164,7 @@ def restrict_ds(ds: xr.Dataset, fields=None) -> xr.Dataset:
 
 # unify coordinates and implement correct x-spacing
 # xarray doesn't handle duplicate dimensions well, so use clunkily split-rename-merge
-def unify_coords(ds: xr.Dataset, res:int) -> xr.Dataset:
+def unify_coords(ds: xr.Dataset, res: int) -> xr.Dataset:
     """
     unify coordinate names
     implement correct x-spacing using res, assume res is given in meters
