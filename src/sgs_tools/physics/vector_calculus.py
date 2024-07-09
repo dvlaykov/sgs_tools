@@ -1,44 +1,46 @@
-
 import xarray as xr
 import numpy as np
 from typing import Iterable
 
+
 # Vector calculus
-def grad_vector(vec, space_dims: Iterable[str], new_dim_name = 'c2', name = None):
-    ''' gradient tensor of a vector -- centred 2nd order difference, reduced to 1st order at  boundaries
-        vec : xarray.DataArray, with spatial coordinates `space_dims`
-        space_dims : list of names of spatial dimensions w.r.t. which to take the gradient
-        new_dim_name: string, name of new dimension
-        return : gradient (assuming cartesian geometry) as xarray.DataArray
-    '''
+def grad_vector(vec, space_dims: Iterable[str], new_dim_name="c2", name=None):
+    """gradient tensor of a vector -- centred 2nd order difference, reduced to 1st order at  boundaries
+    vec : xarray.DataArray, with spatial coordinates `space_dims`
+    space_dims : list of names of spatial dimensions w.r.t. which to take the gradient
+    new_dim_name: string, name of new dimension
+    return : gradient (assuming cartesian geometry) as xarray.DataArray
+    """
     gradvec = []
     for dim in space_dims:
         gradvec.append(vec.differentiate(dim, edge_order=1))
-    gradvec = xr.concat(gradvec,
-                        dim = xr.DataArray(range(1,len(space_dims)+1),
-                                           dims = [new_dim_name]))
+    gradvec = xr.concat(
+        gradvec, dim=xr.DataArray(range(1, len(space_dims) + 1), dims=[new_dim_name])
+    )
     if not name is None:
         gradvec.name = name
     return gradvec
 
-def grad_vector_lin(vec, space_dims: Iterable[str], new_dim_name = 'c2', name = None):
-    ''' gradient tensor of a vector -- 1st order backward finite-difference,
-        vec : xarray.DataArray, with spatial coordinates `space_dims`
-        space_dims : list of names of spatial dimensions w.r.t. which to take the gradient
-        new_dim_name: string, name of new dimension
-        return : gradient (assuming cartesian geometry) as xarray.DataArray
-    '''
+
+def grad_vector_lin(vec, space_dims: Iterable[str], new_dim_name="c2", name=None):
+    """gradient tensor of a vector -- 1st order backward finite-difference,
+    vec : xarray.DataArray, with spatial coordinates `space_dims`
+    space_dims : list of names of spatial dimensions w.r.t. which to take the gradient
+    new_dim_name: string, name of new dimension
+    return : gradient (assuming cartesian geometry) as xarray.DataArray
+    """
     gradvec = []
     for dim in space_dims:
-        coord = vec[dim].astype(float) # just in case
+        coord = vec[dim].astype(float)  # just in case
         val = vec.astype(float)
 
-        gradvec.append( (val - val.shift({dim:-1}, fill_value=np.nan))/
-                        (coord - coord.shift({dim:-1}, fill_value=np.nan))
-                      )
-    gradvec = xr.concat(gradvec,
-                        dim = xr.DataArray(range(1,len(space_dims)+1), dims = [new_dim_name]))
+        gradvec.append(
+            (val - val.shift({dim: -1}, fill_value=np.nan))
+            / (coord - coord.shift({dim: -1}, fill_value=np.nan))
+        )
+    gradvec = xr.concat(
+        gradvec, dim=xr.DataArray(range(1, len(space_dims) + 1), dims=[new_dim_name])
+    )
     if not name is None:
         gradvec.name = name
     return gradvec
-
