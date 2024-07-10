@@ -4,7 +4,7 @@ __pycache__/
 *$py.class
 
 #jupyter notebooks
-**/.ipynb_checkpoints
+**/.ipynb_checkpoints/
 profile_default/
 ipython_config.py
 
@@ -32,8 +32,10 @@ share/python-wheels/
 *.egg
 MANIFEST
 
+
 # pytype static type analyzer
 .pytype/
+**/mypy_cache/
 
 # mypy
 .mypy_cache/
@@ -41,5 +43,12 @@ MANIFEST
 dmypy.json
 
 # Sphinx documentation
-docs/_build/
+doc/_build/
+
+#testing
+.tox/
+.ruff_cache
+.coverage
+
+
 
