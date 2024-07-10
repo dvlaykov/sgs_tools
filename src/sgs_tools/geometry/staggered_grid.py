@@ -1,7 +1,6 @@
-from typing import Dict, List, Union
-
 import xarray as xr
 from numpy import nan
+from xarray.core.types import T_Xarray
 
 
 def get_grid_spacing_coord(coord, new_dim):
@@ -11,11 +10,11 @@ def get_grid_spacing_coord(coord, new_dim):
 
 
 def interpolate_to_grid(
-    ds: xr.DataArray | xr.Dataset,
-    target_dims: List[str] = [],
-    coord_map: Dict[str, xr.DataArray] = {},
+    ds: T_Xarray,
+    target_dims: list[str] = [],
+    coord_map: dict[str, xr.DataArray] = {},
     drop_coords: bool = True,
-) -> Union[xr.DataArray, xr.Dataset]:
+) -> T_Xarray:
     """Spatial interpolation to a target_grid
     ds: xarray Dataset/DataArray. Needs to have dimensions with coordinates
         that are labelled 'x*', 'y*', 'z*' etc. or
@@ -29,10 +28,11 @@ def interpolate_to_grid(
         target_dims = [target_dims]
 
     if target_dims:
-        # assume spatial coordinates have x, y, z
-        x_dims = [x for x in ds.dims if x.startswith("x")]
-        y_dims = [y for y in ds.dims if y.startswith("y")]
-        z_dims = [z for z in ds.dims if z.startswith("z")]
+        assert not coord_map, "Should specify only target_dims or coord_map"
+        # assume spatial coordinates are strings that start with x|y|z
+        x_dims = [x for x in ds.dims if str(x).startswith("x")]
+        y_dims = [y for y in ds.dims if str(y).startswith("y")]
+        z_dims = [z for z in ds.dims if str(z).startswith("z")]
         missing_coords = [dim for dim in target_dims if dim not in ds.coords]
         assert (
             len(missing_coords) == 0
@@ -40,17 +40,24 @@ def interpolate_to_grid(
         x_target = [x for x in target_dims if x.startswith("x")]
         y_target = [y for y in target_dims if y.startswith("y")]
         z_target = [z for z in target_dims if z.startswith("z")]
-        assert len(x_target) == 1
-        x_target = x_target[0]
-        assert len(y_target) == 1
-        y_target = y_target[0]
-        assert len(z_target) == 1
-        z_target = z_target[0]
+        # check that there is at most one of {x|y|z}_target dimension
+        assert len(x_target) <= 1
+        assert len(y_target) <= 1
+        assert len(z_target) <= 1
 
         coord_map = {}
-        coord_map.update({x: ds[x_target] for x in x_dims if x != x_target})
-        coord_map.update({y: ds[y_target] for y in y_dims if y != y_target})
-        coord_map.update({z: ds[z_target] for z in z_dims if z != z_target})
+        if len(x_target) == 1:
+            coord_map.update(
+                {str(x): ds[x_target[0]] for x in x_dims if str(x) != x_target[0]}
+            )
+        if len(y_target) == 1:
+            coord_map.update(
+                {str(y): ds[y_target[0]] for y in y_dims if str(y) != y_target[0]}
+            )
+        if len(z_target) == 1:
+            coord_map.update(
+                {str(z): ds[z_target[0]] for z in z_dims if str(z) != z_target[0]}
+            )
 
     else:
         missing_dims = [dim for dim in coord_map.keys() if dim not in ds.dims]
@@ -77,15 +84,15 @@ def interpolate_to_grid(
                 drop_coords_list.append(dims[0])
 
     # interpolate all fields to target grid and drop coordinates
-    ds_interp = ds_interp.interp(c_map, method="linear", assume_sorted=True).drop(
+    ds_interp = ds_interp.interp(c_map, method="linear", assume_sorted=True).drop_vars(
         drop_coords_list
     )
     return ds_interp
 
 
 def compose_vector_components_on_grid(
-    components: List[xr.DataArray],
-    target_dims: List[str] = [],
+    components: list[xr.DataArray],
+    target_dims: list[str] = [],
     vector_dim: str = "c1",
     name: str = "",
     long_name: str = "",
@@ -97,14 +104,15 @@ def compose_vector_components_on_grid(
     """
     # interpolate
     if target_dims is []:
-        assert all([all(components[0].dims == x.dims) for x in components[1:]]), (
+        assert all([components[0].dims == x.dims for x in components[1:]]), (
             "The components' dimensions don't match. "
             "Choose a set of dimensions to interpolate t!"
         )
         vec = components
     else:
         vec = [
-            interpolate_to_grid(comp, target_dims, drop_coords) for comp in components
+            interpolate_to_grid(comp, target_dims, drop_coords=drop_coords)
+            for comp in components
         ]
     # combine into a vector
     vec_arr = xr.concat(vec, dim=xr.DataArray(range(1, 4), dims=[vector_dim]))
@@ -116,17 +124,19 @@ def compose_vector_components_on_grid(
     return vec_arr
 
 
-def diff_lin_on_grid(ds, dim, periodic_field=False):
+def diff_lin_on_grid(
+    ds: xr.DataArray, dim: str, periodic_field: bool = False
+) -> xr.DataArray:
     """differentiate on staggered grid
     return the derivative on the grid with offset staggering
 
     this assumes that we have index staggering:
     c_face[i] --  +  ------ c_face[i+1] -------- +
     |             |                 |            |
-    + ------- c_cen[i] ------------ + ---- c_cen[i+1]
+    + ------- c_cent[i] ----------- + -- c_cent[i+1]
 
     BCs: coordinate is extrapolated with the neighbouring cell spacing;
-    no BCs inclfield is treated as periodic
+    or direction is treated as periodic
 
     """
 
@@ -173,8 +183,8 @@ def diff_lin_on_grid(ds, dim, periodic_field=False):
 
 def grad_on_cart_grid(
     ds: xr.DataArray,
-    space_dims: List[str],
-    periodic_field: List[bool] = [False, False, False],
+    space_dims: list[str],
+    periodic_field: list[bool] = [False, False, False],
 ) -> xr.Dataset:
     """differentiate a scalar with respect to space dims on staggered grid
     BCs: coordinate is extrapolated with the neighbouring cell spacing;
@@ -197,8 +207,8 @@ def grad_on_cart_grid(
 
 def grad_vec_on_grid(
     ds: xr.Dataset,
-    target_dims: List[str] = ["x_centre", "y_centre", "z_centre"],
-    new_dim_name: List[str] = ["c1", "c2"],
+    target_dims: list[str] = ["x_centre", "y_centre", "z_centre"],
+    new_dim_name: list[str] = ["c1", "c2"],
     name: str | None = None,
 ) -> xr.DataArray:
     """computes gradient of a vector described onto target dimensions
@@ -213,20 +223,23 @@ def grad_vec_on_grid(
 
     for i, f in enumerate(ds):
         # individual sapce dimensions for each staggered field
-        space_dims = sorted([d for d in ds[f].dims if d[0] in "xyz"])
+        space_dims = sorted([str(d) for d in ds[f].dims if str(d)[0] in "xyz"])
         grad_f = grad_on_cart_grid(ds[f], space_dims)
         # interpolate onto target coordinates from original ds (must exist)
         # careful grad_on_cart_grid will create coordinates with possibly classhing names
         # so make an explicit coordinate map
         coord_map = {}
         for k in grad_f.dims:
-            if k[0] in "xyz":
+            k_str = str(
+                k
+            )  # xr.Dataset.dims is a Hashable and interpolate expects a str
+            if k_str[0] in "xyz":
                 # name match by first character xyz
-                target_coord = [c for c in target_dims if c[0] == k[0]][0]
-                coord_map[k] = ds[target_coord]
-        grad_f_on_cent = interpolate_to_grid(grad_f, coord_map=coord_map)
+                target_coord = [c for c in target_dims if c[0] == k_str[0]][0]
+                coord_map[k_str] = ds[target_coord]
+        grad_f_on_cent_ds = interpolate_to_grid(grad_f, coord_map=coord_map)
         # convert to a dataarray
-        grad_f_on_cent = grad_f_on_cent.to_dataarray(d_name).sortby(d_name)
+        grad_f_on_cent = grad_f_on_cent_ds.to_dataarray(d_name).sortby(d_name)
         # rename c1 coordinates: fragile this works only because of
         # the naming in interpolate_to_grid
         grad_f_on_cent[d_name] = [f"d{x.item()[-1]}" for x in grad_f_on_cent[d_name]]
