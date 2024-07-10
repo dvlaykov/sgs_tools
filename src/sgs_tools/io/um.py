@@ -124,8 +124,22 @@ def rename_variables(ds: xr.Dataset) -> xr.Dataset:
     vertical_dim_map = {
         k: v for k, v in vertical_dim_map.items() if k in ds and v in ds
     }
-
     ds = ds.swap_dims(vertical_dim_map)
+
+    # rename dimension fields by association with a primary field
+    dim_names = {
+        "thlev_zsea_theta": "z_theta",
+        "rholev_zsea_rho": "z_rho",
+        "latitude_t": "y_theta",
+        "longitude_t": "x_theta",
+        "latitude_cu": "y_cu",
+        "longitude_cu": "x_cu",
+        "latitude_cv": "y_cv",
+        "longitude_cv": "x_cv",
+    }
+    intersection = {k: v for k, v in dim_names.items() if k in ds}
+    ds = ds.rename(intersection)
+
     # swap to an easy time-dimension
     tname = "min15T0"
     torigin = ds["min15T0_0"][0]
@@ -155,20 +169,6 @@ def restrict_ds(ds: xr.Dataset, fields:None|Iterable[str]=None) -> xr.Dataset:
     # drop all secondary fields
     ds = ds[list(intersection)]
     # rename primary fields for convenience
-    ds = ds.rename(intersection)
-
-    # rename dimensions fields for clarity
-    dim_names = {
-        "thlev_zsea_theta": "z_theta",
-        "rholev_zsea_rho": "z_rho",
-        "latitude_t": "y_theta",
-        "longitude_t": "x_theta",
-        "latitude_cu": "y_cu",
-        "longitude_cu": "x_cu",
-        "latitude_cv": "y_cv",
-        "longitude_cv": "x_cv",
-    }
-    intersection = {k: v for k, v in dim_names.items() if k in ds}
     ds = ds.rename(intersection)
     return ds
 
