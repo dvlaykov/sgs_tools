@@ -81,7 +81,6 @@ def read_stash_files(
     """
     datasets = []
     for c in file_codes:
-
         file = Path(base_dir) / f"{prefix}_p{c}000.nc"
         print(f"Reading {file}")
         datasets.append(xr.open_dataset(file, chunks={}))
@@ -152,7 +151,7 @@ def rename_variables(ds: xr.Dataset) -> xr.Dataset:
     return ds
 
 
-def restrict_ds(ds: xr.Dataset, fields:None|Iterable[str]=None) -> xr.Dataset:
+def restrict_ds(ds: xr.Dataset, fields: None | Iterable[str] = None) -> xr.Dataset:
     """restrict the dataset to fields of interest
 
     :param ds: input dataset
@@ -175,7 +174,7 @@ def restrict_ds(ds: xr.Dataset, fields:None|Iterable[str]=None) -> xr.Dataset:
 # unify coordinates and implement correct x-spacing
 # xarray doesn't handle duplicate dimensions well, so use clunkily split-rename-merge
 def unify_coords(ds: xr.Dataset, res: int) -> xr.Dataset:
-    """ unify coordinate names
+    """unify coordinate names
 
     implement correct x-spacing using res, assume res is given in meters
     rename coordinates with reference to a logically-cartesian grid
