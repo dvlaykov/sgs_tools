@@ -1,10 +1,10 @@
-import xarray as xr
-import numpy as np
-import os, re
+import os
+import re
+from pathlib import Path
 from typing import Iterable
 
-from pathlib import Path
-
+import numpy as np
+import xarray as xr
 
 base_fields_dict = {
     "U_COMPNT_OF_WIND_AFTER_TIMESTEP": "u",

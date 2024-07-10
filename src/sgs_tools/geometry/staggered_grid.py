@@ -1,6 +1,7 @@
+from typing import Dict, List, Union
+
 import xarray as xr
 from numpy import nan
-from typing import Union, List, Dict
 
 
 def get_grid_spacing_coord(coord, new_dim):
