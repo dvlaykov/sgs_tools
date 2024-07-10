@@ -3,8 +3,8 @@ from typing import Callable, Iterable, Union
 import numpy as np
 import xarray as xr
 
-from .tensor_algebra import symmetrise, traceless
-from .vector_calculus import grad_vector
+from ..geometry.tensor_algebra import symmetrise, traceless
+from ..geometry.vector_calculus import grad_vector
 
 
 def strain_from_vel(
