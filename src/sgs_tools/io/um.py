@@ -73,11 +73,12 @@ def read_stash_files(
     base_dir: Path | str, prefix: str, file_codes: Iterable[str]
 ) -> xr.Dataset:
     """combine a list of output Stash files
-    base_dir: basic directory
-    rose_suite: the name of the suite wihtout the "u-" prefix
-    resolution: (string) -- used for filename parsing
-    file_codes: list of strings, the codes used by Stash system,
-                e.g. "r" for the main fields, we put diagnostics in "b"
+
+    :param base_dir: base directory containing all files
+    :param prefix: prefix for all filenames -- will be expanded to ``f"{prefix}_p{c}000.nc"`` with `c` from `file_codes`
+    :param file_codes: the codes used by Stash system for different output files;
+                 e.g. "r" for the main fields, we typically put SGS model diagnostics in "b"
+    :return: `xarray.Dataset` with all available variables
     """
     datasets = []
     for c in file_codes:
@@ -90,7 +91,17 @@ def read_stash_files(
 
 # Pre-process input UM arrays
 def rename_variables(ds: xr.Dataset) -> xr.Dataset:
-    """rename stash variables to something meaningful, i.e. long_name"""
+    """rename STASH variables:
+
+       * varaibles take their `long_name` with special characters replaced by '_'. The stash code is retained as attribute for back-searches;
+
+       * spacial coordinates/dimesions to ``z_{theta|rho}`` and ``{x|y}_{face|centre}``
+
+       * time becomes ``t`` and ``t_0``
+
+    :param ds: input dataset
+    :return: dataset with renamed variables
+    """
 
     def varname_str(varStr: str):
         """replace special characters in varStr with "_" """
@@ -128,11 +139,11 @@ def rename_variables(ds: xr.Dataset) -> xr.Dataset:
     return ds
 
 
-def restrict_ds(ds: xr.Dataset, fields=None) -> xr.Dataset:
-    """restrict the dataset to fields of interest (if fields=None) or to
-    a pre-selected list of fields]
+def restrict_ds(ds: xr.Dataset, fields:None|Iterable[str]=None) -> xr.Dataset:
+    """restrict the dataset to fields of interest
 
-    and rename vars, coords, dims
+    :param ds: input dataset
+    :return: dataset with renamed variables
     """
 
     intersection = {k: v for k, v in field_names_dict.items() if k in ds}
@@ -165,10 +176,15 @@ def restrict_ds(ds: xr.Dataset, fields=None) -> xr.Dataset:
 # unify coordinates and implement correct x-spacing
 # xarray doesn't handle duplicate dimensions well, so use clunkily split-rename-merge
 def unify_coords(ds: xr.Dataset, res: int) -> xr.Dataset:
-    """
-    unify coordinate names
+    """ unify coordinate names
+
     implement correct x-spacing using res, assume res is given in meters
-    rename coordinates with reference to logically-cartesian grid
+    rename coordinates with reference to a logically-cartesian grid
+
+    :param ds: input dataset
+    :param res: resolution of dataset -- to create correct x-y grid for idealised runs (the existing one is in lat-lon coords)
+    :return: dataset with renamed variables
+
     """
     # actual coordinates
     x_face = np.linspace(
