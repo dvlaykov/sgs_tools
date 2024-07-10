@@ -237,6 +237,6 @@ def grad_vec_on_grid(
     gradvec_da = gradvec_da.sortby(vec_name)
     # rename c2 coordinates: less fragile but still a bit idiosyncratic
     gradvec_da[vec_name] = [f"v{i+1}" for i in range(len(gradvec_comp))]
-    if not name is None:
+    if name is not None:
         gradvec_da.name = name
     return gradvec_da

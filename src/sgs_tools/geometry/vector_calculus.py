@@ -21,7 +21,7 @@ def grad_vector(
     gradvec_xarr = xr.concat(
         gradvec, dim=xr.DataArray(range(1, len(space_dims) + 1), dims=[new_dim_name])
     )
-    if not name is None:
+    if name is not None:
         gradvec_xarr.name = name
     return gradvec_xarr
 
@@ -47,6 +47,6 @@ def grad_vector_lin(
     gradvec_xarr = xr.concat(
         gradvec, dim=xr.DataArray(range(1, len(space_dims) + 1), dims=[new_dim_name])
     )
-    if not name is None:
+    if name is not None:
         gradvec_xarr.name = name
     return gradvec_xarr
