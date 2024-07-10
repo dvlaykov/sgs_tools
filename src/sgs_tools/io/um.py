@@ -1,4 +1,3 @@
-import os
 import re
 from pathlib import Path
 from typing import Iterable
@@ -161,7 +160,7 @@ def restrict_ds(ds: xr.Dataset, fields:None|Iterable[str]=None) -> xr.Dataset:
     """
 
     intersection = {k: v for k, v in field_names_dict.items() if k in ds}
-    if not fields is None:
+    if fields is not None:
         intersection = {k: v for k, v in intersection.items() if v in fields}
 
     # print ("Missing fields:", {k for k in fields if k not in intersection})
