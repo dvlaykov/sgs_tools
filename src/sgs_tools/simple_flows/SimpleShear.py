@@ -1,8 +1,7 @@
 from dataclasses import dataclass
 from typing import Iterable
 
-import numpy as np
-from xarray import DataArray
+import xarray as xr
 
 from ..geometry.grid import CoordScalar, Grid
 
@@ -13,29 +12,27 @@ class SimpleShear:
 
     :ivar grid: grid which provices coordinates
     :ivar dimensions: labels of shearing directions
-    :ivar velcomp: component of velocity vector that is sheared (all others are set to 0)
-    :ivar amplitude: value of gradient
+    :ivar velcomp: 0-indexed component of velocity vector that is sheared (all others are set to 0)
+    :ivar amplitudes: value of gradient alond `dimensions`
     """
 
     grid: Grid
     dimensions: Iterable[str]
     velcomp: int
-    amplitudes: np.typing.ArrayLike
+    amplitudes: list[float]
 
-    def velocity(self, shape: list[int]) -> DataArray:
+    def velocity(self, shape: list[int]) -> xr.DataArray:
         """produce a velocity field with a given shape
 
         :param shape: shape of velocity field
         """
-        coord_mesh = self.grid.mesh(shape)
-        v_shear = self.amplitude
-        for d in self.dimensions:
-            scalar_gdt = ScalarGradient(self.grid, d, 1.0, 1.0)
-            v_shear *= coord_mesh[d]
-        v_zero = np.zeros_like(v_shear)
-        v = np.roll(np.stack([v_shear, v_zero, v_zero]), self.velcomp, axis=0)
-
-        return DataArray(v, dims=["c1"] + list(coord_mesh.keys()), coords=mesh)
+        v_shear = xr.DataArray(1.0)
+        for i, d in enumerate(self.dimensions):
+            scalar_gdt = ScalarGradient(self.grid, d, self.amplitudes[i], 0.0)
+            v_shear = v_shear * scalar_gdt.field(shape)
+        v_zero = xr.zeros_like(v_shear)
+        vel = xr.concat([v_shear, v_zero, v_zero], dim="c1")
+        return vel.roll(shifts={"c1": self.velcomp})
 
 
 @dataclass(frozen=True)
@@ -51,9 +48,9 @@ class ScalarGradient:
     grid: Grid
     dimension: str
     gdt: float
-    offset: float
+    offset: float = 0.0
 
-    def field(self, shape: list[int]) -> DataArray:
+    def field(self, shape: list[int]) -> xr.DataArray:
         """produce a scalar field with a given shape
 
         :param shape: shape of scalar field
