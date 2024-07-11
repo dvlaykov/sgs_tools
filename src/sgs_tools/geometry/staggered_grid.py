@@ -3,8 +3,14 @@ from numpy import nan
 from xarray.core.types import T_Xarray
 
 
-def get_grid_spacing_coord(coord, new_dim):
-    """get a coordinate for the grid spacing"""
+def get_grid_spacing_coord(coord: xr.DataArray, new_dim: str) -> xr.DataArray:
+    """get a coordinate for the grid spacing
+
+    :param coord: dataarray of a coordinate
+    :param new_dim: name of dimesion associated with grid spacing
+            (would typically shift _face <-> _center)
+    :return: The coordinate spacing with dimension `new_dim`
+    """
     current_name = coord.dims[0]
     return coord.diff(dim=current_name, n=1).rename({current_name: new_dim})
 
@@ -16,13 +22,15 @@ def interpolate_to_grid(
     drop_coords: bool = True,
 ) -> T_Xarray:
     """Spatial interpolation to a target_grid
-    ds: xarray Dataset/DataArray. Needs to have dimensions with coordinates
+
+    :param ds: input data array or dataset. Needs to have dimensions with coordinates
         that are labelled 'x*', 'y*', 'z*' etc. or
 
-    target_dims: list of 3 dimension names  to interpolate to, in the order xdim, ydim, zdim.
+    :param target_dims: list of 3 dimension names  to interpolate to, in the order xdim, ydim, zdim.
         They must exist in ds as DataArry/coordinates
-    coord_map: dictionary of {existing_dimension_in_ds : target_coordinate_as_DataArray}
-    drop_coords: flag to exclude spatial coordinates relying on removed dims from output
+    :param coord_map: dictionary of {existing_dimension_in_ds : target_coordinate_as_DataArray}
+    :param drop_coords: flag to exclude spatial coordinates relying on removed dims from output
+    :return: the input data interpolated to the target coordinates
     """
     if isinstance(target_dims, str):
         target_dims = [target_dims]
@@ -99,8 +107,12 @@ def compose_vector_components_on_grid(
     drop_coords: bool = True,
 ) -> xr.DataArray:
     """turn a list of arrays into a vector field
-    if target_dims is given will interpolate onto it first,
-    otherwise all componets must have the same dimesions and coordinates
+    :param components: list of vector components
+    :param target_dims: if target_dims is given, it will interpolate onto it first, otherwise all componets must have the same dimesions and coordinates
+    :param vector_dim: label of dimension indexing vector components
+    :param name: name of new array
+    :param lon_name: long_name of new array
+    :param drop_coords: flag picked up by :meth:`interpolate_to_grid` to exclude spatial coordinates relying on removed dims from output
     """
     # interpolate
     if target_dims is []:
@@ -127,17 +139,23 @@ def compose_vector_components_on_grid(
 def diff_lin_on_grid(
     ds: xr.DataArray, dim: str, periodic_field: bool = False
 ) -> xr.DataArray:
-    """differentiate on staggered grid
-    return the derivative on the grid with offset staggering
+    """differentiate a dataarray on staggered grid
+    assumes that we have coordinate staggering as\:
 
-    this assumes that we have index staggering:
-    c_face[i] --  +  ------ c_face[i+1] -------- +
-    |             |                 |            |
-    + ------- c_cent[i] ----------- + -- c_cent[i+1]
+    .. parsed-literal::
 
-    BCs: coordinate is extrapolated with the neighbouring cell spacing;
-    or direction is treated as periodic
+        c_face(i) --  +  ------ c_face(i+1) -------- +
+        |             |                 |            |
+        + ------ c_centre(i) ---------- + ----- c_centre(i+1)
 
+    where `c_{face|center}` is any dimension
+    :param ds: input array to be differentiated
+    :param dim: dimension along which to differentiate
+    :param periodic_field: boundary condition treatment; if `False` will
+    fill boundary values with NaN. Note that only 1 boundary is undefined\:
+    upper boundary for face-coordinates, and lower boundary for centre-coordinates.
+    :return: the derivative on the grid with offset staggering in the differentiated dimension
+    face -> centre and v.v.
     """
 
     def delta(coord, shift):
@@ -186,9 +204,10 @@ def grad_on_cart_grid(
     space_dims: list[str],
     periodic_field: list[bool] = [False, False, False],
 ) -> xr.Dataset:
-    """differentiate a scalar with respect to space dims on staggered grid
-    BCs: coordinate is extrapolated with the neighbouring cell spacing;
-         no BCs inclfield is treated as periodic
+    """differentiate a scalar with respect to given space dims on staggered grid
+    :param ds: input array to be differentiated
+    :param space_dims: labels for the spatial dimensions (to be differentiated against)
+    :param periodic_field: boundary condition treatment; passed to :meth:`diff_lin_on_grid`
     """
     name = ds.name
     if name is None:
