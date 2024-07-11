@@ -1,11 +1,21 @@
 Welcome to the SGS_tools documentation!
 =======================================
 
+Preliminaries
+=============
+
+.. mdinclude:: ../README.md
+.. mdinclude:: ../TASKLIST.md
+
+==============================
+
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 4
    :caption: Contents:
 
    io
+   geometry
+   simple_flow
 
 Indices and tables
 ==================

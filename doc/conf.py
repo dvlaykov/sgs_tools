@@ -33,12 +33,13 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.imgmath",
     "sphinx_autodoc_typehints",
+    "sphinx_mdinclude"
 ]
 
 
 def skip(app, what, name, obj, would_skip, options):
     if name == "__init__":
-        return False
+        return True
     return would_skip
 
 
@@ -60,11 +61,16 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-# html_theme = 'alabaster'
+# html_theme = "alabaster"
 # html_theme = 'classic'
-html_theme = "sphinxdoc"
+# html_theme = "sphinxdoc"
+html_theme = "pydata_sphinx_theme"
+
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ["_static"]
+# html_static_path = ["_static"]
+
+# ordering
+autodoc_member_order = "bysource"
