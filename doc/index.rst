@@ -15,6 +15,7 @@ Preliminaries
 
    io
    geometry
+   physics
    simple_flow
 
 Indices and tables
