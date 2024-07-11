@@ -33,7 +33,8 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.imgmath",
     "sphinx_autodoc_typehints",
-    "sphinx_mdinclude"
+    "sphinx_mdinclude",
+    "sphinx.ext.viewcode",
 ]
 
 
