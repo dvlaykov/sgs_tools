@@ -10,6 +10,8 @@ def tensor_self_outer_product(arr: xr.DataArray) -> xr.DataArray:
     :param arr: xarray Dataset with dimension `c1` which will be used for the tensor product
     :param returns: xarray DataArray with the 'i' and 'j' dimensions sorted to the front.
     """
+    assert "c1" in arr.dims
+    assert "c2" not in arr.dims
     return (arr * arr.rename({"c1": "c2"})).transpose("c1", "c2", ...)
 
 
