@@ -1,3 +1,5 @@
+from typing import Sequence
+
 import numpy as np
 import xarray as xr
 
@@ -16,7 +18,7 @@ def tensor_self_outer_product(arr: xr.DataArray) -> xr.DataArray:
 
 
 def trace(
-    tensor: xr.DataArray, dims: list[str] = ["c1", "c2"], name=None
+    tensor: xr.DataArray, dims: tuple[str, str] = ("c1", "c2"), name=None
 ) -> xr.DataArray:
     """trace along 2 dimesions.
 
@@ -34,7 +36,9 @@ def trace(
 
 
 # Make a tensor Traceless along 2 dimensions
-def traceless(tensor: xr.DataArray, dims: list[str] = ["c1", "c2"]) -> xr.DataArray:
+def traceless(
+    tensor: xr.DataArray, dims: tuple[str, str] = ("c1", "c2")
+) -> xr.DataArray:
     """returns a traceless version of `tensor`. **NB** \: bug/unexpected behaviour when nan in trace
 
     :param tensor: tensor input
@@ -52,7 +56,7 @@ def traceless(tensor: xr.DataArray, dims: list[str] = ["c1", "c2"]) -> xr.DataAr
 
 
 def Frobenius_norm(
-    tensor: xr.DataArray, tens_dims: list[str] = ["c1", "c2"]
+    tensor: xr.DataArray, tens_dims: Sequence[str] = ["c1", "c2"]
 ) -> xr.DataArray:
     """Frobenius norm of a tensor\: :math:`|A| = \sqrt{Aij Aij}`
 
@@ -63,7 +67,7 @@ def Frobenius_norm(
 
 
 def symmetrise(
-    tensor: xr.DataArray, dims: list[str] = ["c1", "c2"], name=None
+    tensor: xr.DataArray, dims: Sequence[str] = ["c1", "c2"], name=None
 ) -> xr.DataArray:
     """:math:`0.5 (a + a^T)`.
 
@@ -75,7 +79,7 @@ def symmetrise(
         whether `tensor` is square with respect to the transposed dimensions.
     :param name: name of symmetrized tensor.
     """
-    transpose_map = dict([dims, dims[::-1]])
+    transpose_map = dict(zip(dims, dims[::-1]))
     sij = 0.5 * (tensor + tensor.rename(transpose_map))
     if name is not None:
         sij.name = name

@@ -26,7 +26,7 @@ def strain_from_vel(
     gradvel = grad_operator(vel, space_dims, new_dim)
     sij = symmetrise(gradvel, [vec_dim, new_dim])
     if make_traceless:
-        sij = traceless(sij, [vec_dim, new_dim])
+        sij = traceless(sij, (vec_dim, new_dim))
     return sij
 
 
