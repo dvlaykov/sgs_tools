@@ -5,3 +5,5 @@
    :members:
 .. automodule:: sgs_tools.sgs.sgs_model
    :members:
+.. automodule:: sgs_tools.sgs.Smagorinsky
+   :members:
