@@ -17,6 +17,7 @@ Preliminaries
    geometry
    physics
    simple_flow
+   sgs
 
 Indices and tables
 ==================
