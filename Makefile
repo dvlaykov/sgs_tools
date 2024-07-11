@@ -11,3 +11,7 @@ format:
 
 mypy:
 	python3 -m tox -e mypy
+
+
+style_check:
+	python3 -m tox -e style_check
