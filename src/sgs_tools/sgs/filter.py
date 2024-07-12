@@ -6,12 +6,12 @@ import xarray as xr
 
 # Filter kernels
 
-# 3x3 2d Gaussian filter -- binomial approximation
+#: 3x3 2d Gaussian filter -- binomial approximation
 weight_gauss_3d = xr.DataArray(
     np.array([[1, 2, 1], [2, 4, 2], [1, 2, 1]]) / 16.0, dims=["w1", "w2"]
 )
 
-# 5x5 2d Gaussian filter -- binomial approximation
+#: 5x5 2d Gaussian filter -- binomial approximation
 weight_gauss_5d = (
     xr.DataArray(
         np.array(
