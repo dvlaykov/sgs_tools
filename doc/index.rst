@@ -1,9 +1,14 @@
 Welcome to the SGS_tools documentation!
 =======================================
 
+```{toctree}
+:caption: Navigation and links
+
+navigation
+```
+
 Preliminaries
 =============
-
 .. mdinclude:: ../README.md
 .. mdinclude:: ../TASKLIST.md
 

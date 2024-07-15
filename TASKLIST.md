@@ -45,6 +45,9 @@
     * Add a mixed and nonlinear model extensions
     * Generalise dynamic coefficient calculations
 
+      * test `xr.dot` behaves as desired to contract dimensions
+      * Optimize simultaneous calculation at multiple scales or contraction dims
+
 
 
 

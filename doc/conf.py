@@ -66,8 +66,7 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 # html_theme = 'classic'
 # html_theme = "sphinxdoc"
 html_theme = "pydata_sphinx_theme"
-
-
+html_theme_options = {"show_nav_level": 2}
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
@@ -75,3 +74,5 @@ html_theme = "pydata_sphinx_theme"
 
 # ordering
 autodoc_member_order = "bysource"
+# hide full package hierarchy
+add_module_names = False
