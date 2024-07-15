@@ -79,12 +79,12 @@ def read_stash_files(
                  e.g. "r" for the main fields, we typically put SGS model diagnostics in "b"
     :return: `xarray.Dataset` with all available variables
     """
-    datasets = []
-    for c in file_codes:
-        file = Path(base_dir) / f"{prefix}_p{c}000.nc"
-        print(f"Reading {file}")
-        datasets.append(xr.open_dataset(file, chunks={}))
-    return xr.merge(datasets)
+
+    fname_pattern = f"{prefix}*[{''.join(file_codes)}]*.nc"
+    print(f"Reading {base_dir}/{fname_pattern}")
+    # turn Path.glob() into list because of incomplete typehints of xr.open_mfdataset
+    dataset = xr.open_mfdataset(list(Path(base_dir).glob(fname_pattern)), chunks={})
+    return dataset
 
 
 # Pre-process input UM arrays
