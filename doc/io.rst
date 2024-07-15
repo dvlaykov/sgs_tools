@@ -1,4 +1,4 @@
-:mod:`.io`: Input/Output
+Input/Output: :mod:`.io`
 ==============================================================
 
 .. automodule:: sgs_tools.io.um

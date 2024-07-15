@@ -1,4 +1,4 @@
-:mod:`.sgs`: Sub-grid analysis
+Sub-grid analysis: :mod:`.sgs`
 ==============================================================
 
 --------------
@@ -12,6 +12,8 @@ Filter kernels
 SGS base
 ---------
 .. automodule:: sgs_tools.sgs.sgs_model
+   :members:
+.. automodule:: sgs_tools.sgs.dynamic_coefficient
    :members:
 
 -----------

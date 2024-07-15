@@ -1,22 +1,5 @@
 
-## For developers:
-
-### Install
-  1. clone the [repository](https://github.com/dvlaykov/sgs_tools)
-  2. make an editable install via
-    ```pip install --editable <location-of-repository>```
-
-### Contribute
-  * You can add any issues, feature requests and pull requests directly at the
-    [GitHub repository](https://github.com/dvlaykov/sgs_tools) -- all are very welcome.
-  * Testing, formatting and static types are handled through `tox` and for the whole repo you can run `make test` to check formatting type hints and run the tests and their coverage.
-
-    * Tests rely on the `pytest` package and should go to `test/test_*.py`
-    * Formatting is taken care of by `ruff`. Run `make format` to auto-format.
-    * Type hints are handled by `mypy`. Run `make mypy` to check for any issues
-
-
-### TASKLIST:
+### Task List:
   * **Documentation** -- comlete coverage
   * **Unit testing** -- increase coverage
   * Add scripts, CI programmes and notebook examples

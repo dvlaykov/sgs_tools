@@ -1,4 +1,4 @@
-:mod:`.physics`: Physical field calculators
+Physical field calculators: :mod:`.physics`
 ==============================================================
 
 .. automodule:: sgs_tools.physics.fields
