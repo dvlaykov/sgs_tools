@@ -22,8 +22,8 @@ if errorlevel 9009 (
 	echo.
 	echo.If you don't have Sphinx installed, grab it from
 	echo.http://sphinx-doc.org/
-	echo.You will also need the python packages 'sphinx-mdinclude' and
-	echo.'pydata-sphinx-theme' for optimal rendering
+	echo.You will also need the python packages 'sphinx-mdinclude',
+	echo.'pydata-sphinx-theme',  and, 'sphinx-argparse-cli' for optimal rendering
 	exit /b 1
 )
 

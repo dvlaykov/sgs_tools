@@ -35,6 +35,7 @@ extensions = [
     "sphinx_autodoc_typehints",
     "sphinx_mdinclude",
     "sphinx.ext.viewcode",
+    "sphinx_argparse_cli",
 ]
 
 
