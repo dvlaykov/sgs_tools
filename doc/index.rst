@@ -11,6 +11,7 @@
    physics
    simple_flow
    sgs
+   scripts
 
 ==================
 Indices and tables
