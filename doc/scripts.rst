@@ -7,3 +7,11 @@ Scripts:
   :hook:
   :prog: CS_calculation.py
   :group_title_prefix:
+
+
+.. sphinx_argparse_cli::
+  :module: scripts.make_UM_level_sets
+  :func: parser
+  :hook:
+  :prog: make_UM_level_sets.py
+  :group_title_prefix:
