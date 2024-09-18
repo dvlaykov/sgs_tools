@@ -17,7 +17,7 @@ def compute_scalar_flux(ds, scalar, H, z_lim=None,\
                         fluxes=True, subgrid_total=False, subgrid_total_um=False,\
                         leonard=False, resolved=False, total_flx=False, flux_grad=False,\
                         plotZgrid=False, computeLocalDiffCoef=False, cg_xy_filter=False,\
-                        compute_spectra=False, updrafts_downdrafts=False):
+                        compute_spectra=False, updrafts_downdrafts=False, ds_t_1=None):
 
     # Function to compute sgs-flux components for some horizontal grid resolution at some time point
 
@@ -53,6 +53,11 @@ def compute_scalar_flux(ds, scalar, H, z_lim=None,\
     ds = ds.assign_coords(longitude_t=ds.longitude_t*1000, latitude_t=ds.latitude_t*1000)
     ds = ds.assign_coords(rholev_eta_rho=ds.rholev_eta_rho*H, thlev_eta_theta = ds.thlev_eta_theta*H,\
                           thlev_bl_eta_theta=ds.thlev_bl_eta_theta*H)
+    if ds_t_1 is not None:
+        ds_t_1 = ds_t_1.assign_coords(longitude_t=ds_t_1.longitude_t*1000, latitude_t=ds_t_1.latitude_t*1000)
+        ds_t_1 = ds_t_1.assign_coords(rholev_eta_rho=ds_t_1.rholev_eta_rho*H, thlev_eta_theta = ds_t_1.thlev_eta_theta*H,\
+                          thlev_bl_eta_theta=ds_t_1.thlev_bl_eta_theta*H)
+
 
     dx = ds.longitude_t.values[1] - ds.longitude_t.values[0]
     Nx = len(ds.longitude_t.values)
@@ -115,7 +120,7 @@ def compute_scalar_flux(ds, scalar, H, z_lim=None,\
         qv = ds['STASH_m01s00i010']
         ql = ds['STASH_m01s00i254']
         qf = ds['STASH_m01s00i012']
-        gamma = ds['STASH_m01s03i719']
+        gamma = ds['STASH_m01s03i804']
        
         # compute virtual potential temperature, assuming
         # no liquid water present and specific humidity equal to vapour mixing ratio:
@@ -124,9 +129,9 @@ def compute_scalar_flux(ds, scalar, H, z_lim=None,\
         theta_v.data = theta.data*(1 + 0.622*qv.data)
 
         if subgrid_total_um: 
-            F_blend_grad_rho = ds['STASH_m01s03i714']
-            F_blend_nongrad_rho = ds['STASH_m01s03i715']
-            F_blend_entrain_rho = ds['STASH_m01s03i716']
+            F_blend_grad_rho = ds['STASH_m01s03i800']
+            F_blend_nongrad_rho = ds['STASH_m01s03i801']
+            F_blend_entrain_rho = ds['STASH_m01s03i802']
             F_blended_rho = ds['STASH_m01s03i216']
         flux0 = ds['STASH_m01s03i217']
     if scalar == 'q': 
@@ -141,15 +146,16 @@ def compute_scalar_flux(ds, scalar, H, z_lim=None,\
     rhoK_Ri_rho = ds['STASH_m01s03i504']         
     rhoK_sf_rho = ds['STASH_m01s03i506']         
     rhoK_sc_rho = ds['STASH_m01s03i508']
-    #rhokh = ds['STASH_m01s03i717']
     rhokh = ds['STASH_m01s03i472']
-    rhokhz = ds['STASH_m01s03i718']
+    rhokhz = ds['STASH_m01s03i803']
 
     rho = ds['STASH_m01s00i389']
         
     W_1d_th = ds['STASH_m01s03i513']         
 
-    z_bl = ds['STASH_m01s03i025']
+    if ds_t_1 is None: z_bl = ds['STASH_m01s03i025']
+    else: z_bl = ds_t_1['STASH_m01s03i025'] 
+
     z_loc = ds['STASH_m01s03i358']
 
     Bflux0 = ds['STASH_m01s03i467']
@@ -653,6 +659,7 @@ def compute_scalar_flux(ds, scalar, H, z_lim=None,\
 
                 #F_nl_rho.data[:,jj,ii] = W_1d_rho.data[:,jj,ii]*rhoK_sf_rho.data[:,jj,ii]*gamma_th*unitConversion
                 F_nl_rho.data[:,jj,ii] = W_1d_rho.data[:,jj,ii]*rhokhz.data[:,jj,ii]*gamma_th*unitConversion
+                #F_nl_rho.data[:,jj,ii] = W_1d_rho.data[:,jj,ii]*rhoK_sf_rho.data[:,jj,ii]*gamma.data[jj,ii]*unitConversion
                 #F_nl_rho.data[:,jj,ii] = W_1d_rho.data[:,jj,ii]*rhokhz.data[:,jj,ii]*gamma.data[jj,ii]*unitConversion
 
 
