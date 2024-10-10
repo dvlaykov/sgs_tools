@@ -171,7 +171,7 @@ def data_ingest(
     # interpolate all vars to a cell-centred grid
     centre_dims = ["x_centre", "y_centre", "z_theta"]
     simulation = interpolate_to_grid(simulation, centre_dims, drop_coords=True)
-    # rename spatial dsimensions to 'xyz'
+    # rename spatial dimensions to 'xyz'
     simple_dims = ["x", "y", "z"]
     dim_names = {d_new: d_old for d_new, d_old in zip(centre_dims, simple_dims)}
     simulation = simulation.rename(dim_names)
