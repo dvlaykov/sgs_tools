@@ -51,7 +51,9 @@ def parser() -> dict[str, Any]:
         type=str,
         nargs="+",
         default=("b", "r"),
-        help="STASH stream file codes. Will read files matching the glob pattern '{prefix}*[file_codes}]*.nc'.",
+        help="""STASH stream file codes. Will read files matching the glob pattern '{prefix}*[file_codes}]*.nc'.
+                Expect them to contain the fields 'u', 'v', 'w', 'theta'.
+             """,
     )
     fname.add_argument(
         "h_resolution",
