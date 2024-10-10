@@ -9,17 +9,17 @@
 **NB** The package is in active development. No backwards compatibility is guarranteed at this time.
 
 ## Documentation
-The docs are generated via [sphinx](https://www.sphinx-doc.org/en/master/) and can be generated locally by
-1. Downloading the [repository](https://github.com/dvlaykov/sgs_tools)
-2. Running `make doc` from the top level in the repository will generate html version of the documentation. (you will need the `sphinx`, `sphinx-mdinclude`, and `pydata-sphinx-theme` python packages in your environment)
-3. The resultind docs can be accessed from `<repo_directory>/doc/_build/html/index.html`
+The docs are generated via [sphinx](https://www.sphinx-doc.org/en/master/) and the `sphinx-mdinclude`, and `pydata-sphinx-theme` addons.
+1. If you don't have the dependencies, get them via `pip` or simply reinstall the package adding `"sgs_tools[doc]"` to the end of the install command.
+1. To generate the docs run `make doc` from the top level in the repository. This will generate an html version of the documentation.
+3. The resulting docs can be accessed from `<repo_directory>/doc/_build/html/index.html`
 
 ## For developers:
 
 ### Install
   1. clone the [repository](https://github.com/dvlaykov/sgs_tools)
   2. make an editable install via
-    ```pip install --editable <location-of-repository>```
+    ```pip install --editable <location-of-repository>[dev]```
 
 ### Contribute
   * Please add any issues, feature requests and pull requests directly to the
