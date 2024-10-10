@@ -26,6 +26,18 @@ dependencies = [
     "xarray>=2023.11",
     "dask>=2023.11.0"
 ]
+
+[project.optional-dependencies]
+dev = [
+    "tox",
+    "mypy",
+    "pytest"
+]
+doc = [
+    "sphinx",
+    "sphinx-mdinclude",
+    "pydata-sphinx-theme"
+]
 # [tools.setuptools.package.find]
 # namespace=false
 # #exclude = "scripts"
