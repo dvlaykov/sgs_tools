@@ -1,4 +1,4 @@
-from argparse import ArgumentParser
+from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 from pathlib import Path
 from typing import Any, Sequence
 
@@ -30,7 +30,8 @@ from xarray.core.types import T_Xarray
 
 def parser() -> dict[str, Any]:
     parser = ArgumentParser(
-        description="Compute dynamic Smagorinsky coefficients as function of scale from UM NetCDF output and store them in a NetCDF files"
+        description="Compute dynamic Smagorinsky coefficients as function of scale from UM NetCDF output and store them in a NetCDF files",
+        formatter_class=ArgumentDefaultsHelpFormatter
     )
 
     fname = parser.add_argument_group("I/O datasets on disk")
@@ -42,25 +43,27 @@ def parser() -> dict[str, Any]:
     fname.add_argument(
         "fname_prefix",
         type=str,
-        help="common prefix of filenames to read (should belong to the same simulation)",
-    )
-    fname.add_argument(
-        "h_resolution",
-        type=float,
-        help="horizontal resolution (will use to overwrite horizontal coordinates). **NB** works for ideal simulations",
+        help="""Common prefix of filenames to read (should belong to the same simulation).
+                Will read files matching the glob pattern '{prefix}*[file_codes]*.nc'.""",
     )
     fname.add_argument(
         "--file_codes",
         type=str,
         nargs="+",
         default=("b", "r"),
+        help="STASH stream file codes. Will read files matching the glob pattern '{prefix}*[file_codes}]*.nc'.",
+    )
+    fname.add_argument(
+        "h_resolution",
+        type=float,
         help="horizontal resolution (will use to overwrite horizontal coordinates). **NB** works for ideal simulations",
     )
+
 
     fname.add_argument(
         "output_path",
         type=Path,
-        help="output path, will create/overwrite existing file and create any missing directories",
+        help="output path, will create/overwrite existing file and create any missing intermediate directories",
     )
 
     filter = parser.add_argument_group("Filter parameters")
@@ -87,7 +90,7 @@ def parser() -> dict[str, Any]:
         type=str,
         default="box",
         choices=["box", "gaussian"],
-        help="Shape of filter kernel used for coefficieng regularization.",
+        help="Shape of filter kernel used for coefficient regularization.",
     )
 
     filter.add_argument(
@@ -112,31 +115,9 @@ def parser() -> dict[str, Any]:
         "--plot_path",
         type=Path,
         default=None,
-        help="output directory, for storing mean plots",
+        help="output directory, for storing generated plots",
     )
 
-    time_slice = parser.add_argument_group("Time slice")
-
-    time_slice.add_argument(
-        "--tinit",
-        type=int,
-        default=None,
-        help="""initial time, default to first available""",
-    )
-
-    time_slice.add_argument(
-        "--tend",
-        type=int,
-        default=None,
-        help="""final time,  default to last available""",
-    )
-
-    time_slice.add_argument(
-        "--tstride",
-        type=int,
-        default=1,
-        help="step between times to process, default such that all available times are processed",
-    )
     # parse arguments into a dictionary
     args = vars(parser.parse_args())
 
