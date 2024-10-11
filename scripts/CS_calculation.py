@@ -1,4 +1,4 @@
-from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
+from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
 from pathlib import Path
 from typing import Any, Sequence
 
@@ -31,7 +31,7 @@ from xarray.core.types import T_Xarray
 def parser() -> dict[str, Any]:
     parser = ArgumentParser(
         description="Compute dynamic Smagorinsky coefficients as function of scale from UM NetCDF output and store them in a NetCDF files",
-        formatter_class=ArgumentDefaultsHelpFormatter
+        formatter_class=ArgumentDefaultsHelpFormatter,
     )
 
     fname = parser.add_argument_group("I/O datasets on disk")
@@ -60,7 +60,6 @@ def parser() -> dict[str, Any]:
         type=float,
         help="horizontal resolution (will use to overwrite horizontal coordinates). **NB** works for ideal simulations",
     )
-
 
     fname.add_argument(
         "output_file",
@@ -124,23 +123,22 @@ def parser() -> dict[str, Any]:
 
     plotting.add_argument(
         "--z_chunk_size",
-        type = int,
-        default = None,
-        help = """
+        type=int,
+        default=None,
+        help="""
         Size of dask array chunks in the vertical direction. Should divide the total number of levels.
         Smaller size leads to smaller memory footprint, but may penalize walltime.
-        NB:The default value has not been optimised."""
+        NB:The default value has not been optimised.""",
     )
-
 
     plotting.add_argument(
         "--t_chunk_size",
-        type = int,
-        default = None,
-        help = """
+        type=int,
+        default=None,
+        help="""
         Size of dask array chunks in the time direction. Should divide the total number time snapshots.
         Smaller size leads to smaller memory footprint, but may penalize walltime.
-        NB:The default value has not been optimised."""
+        NB:The default value has not been optimised.""",
     )
     # parse arguments into a dictionary
     args = vars(parser.parse_args())
@@ -256,7 +254,9 @@ def main() -> None:
             file_codes=args["file_codes"],
             required_fields=["u", "v", "w", "theta"],
         )
-    simulation = simulation.chunk({'z':args['z_chunk_size'], 't_0':args['t_chunk_size']})
+    simulation = simulation.chunk(
+        {"z": args["z_chunk_size"], "t_0": args["t_chunk_size"]}
+    )
 
     # check scales make sense
     nhoriz = min(simulation["x"].shape[0], simulation["y"].shape[0])
@@ -421,8 +421,8 @@ def main() -> None:
 
     with timer("Write to disk", "s"):
         output = Path(args["output_file"])
-        if output.suffix != '.nc':
-            output = Path(str(output) + '.nc')
+        if output.suffix != ".nc":
+            output = Path(str(output) + ".nc")
         coeff_at_scale.to_netcdf(
             output, mode="w", compute=True, unlimited_dims=["t_0", "scale"]
         )

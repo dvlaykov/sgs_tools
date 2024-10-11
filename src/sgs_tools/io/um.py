@@ -83,7 +83,7 @@ def read_stash_files(
     fname_pattern = f"{prefix}*[{''.join(file_codes)}]*.nc"
     print(f"Reading {base_dir}/{fname_pattern}")
     # turn Path.glob() into list because of incomplete typehints of xr.open_mfdataset
-    dataset = xr.open_mfdataset(list(Path(base_dir).glob(fname_pattern)), chunks='auto')
+    dataset = xr.open_mfdataset(list(Path(base_dir).glob(fname_pattern)), chunks="auto")
     return dataset
 
 
