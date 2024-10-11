@@ -68,19 +68,20 @@ field_names_dict = base_fields_dict | Water_dict | Smagorinsky_dict | dynamic_SG
 
 # IO
 # open datasets
-def read_stash_files(
-    base_dir: Path | str, fname_pattern: str
-) -> xr.Dataset:
+def read_stash_files(fname_pattern: Path) -> xr.Dataset:
     """combine a list of output Stash files
 
-    :param base_dir: base directory containing all files
-    :param fname_pattern: filename to read. will be interpreted as a glob pattern.
+    :param fname_pattern: filename(s) to read. Will be interpreted as a glob pattern.
     :return: `xarray.Dataset` with all available variables
     """
 
-    print(f"Reading {base_dir}/{fname_pattern}")
-    # turn Path.glob() into list because of incomplete typehints of xr.open_mfdataset
-    dataset = xr.open_mfdataset(list(Path(base_dir).glob(fname_pattern)), chunks="auto")
+    print(f"Reading {fname_pattern}")
+    # parse any glob wildcards in directory or filename
+    parsed = Path(fname_pattern.root).glob(
+        str(Path(*fname_pattern.parts[fname_pattern.is_absolute() :]))
+    )
+    # turn parsed into list because of incomplete typehints of xr.open_mfdataset
+    dataset = xr.open_mfdataset(list(parsed), chunks="auto")
     return dataset
 
 

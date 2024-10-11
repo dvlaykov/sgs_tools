@@ -36,16 +36,10 @@ def parser() -> dict[str, Any]:
 
     fname = parser.add_argument_group("I/O datasets on disk")
     fname.add_argument(
-        "data_dir",
+        "input_files",
         type=Path,
-        help="location of UM data, recognize glob patterns, in case diagnostics are split across multiple NetCDF files",
-    )
-    fname.add_argument(
-        "fname_pattern",
-        type=str,
-        help="""UM diagnostic NetCDF filenames to read. This will be interpreted as a glob pattern. e.g. "CBL_300M*[br]*.nc"
-                (Files should belong to the same simulation).
-            """
+        help=""" location of UM NetCDF diagnostic file(s). Recognizes glob patterns and walks directory trees, e.g. './my_file_p[br]*nc'
+                (All files in the pattern should belong to the same simulation). """,
     )
 
     fname.add_argument(
@@ -158,20 +152,19 @@ def parser() -> dict[str, Any]:
 
 
 def data_ingest(
-    dir_path: Path,
-    fname_pattern: str,
+    fname_pattern: Path,
     res: float,
     required_fields: list[str] = ["u", "v", "w", "theta"],
 ):
     """read and pre-process UM data
 
-    :param dir_path: directory containing UM NetCDF files
-    :param fname_pattern: filename(s) to read. will be interpreted as a glob pattern. (should belong to the same simulation)
+    :param dir_path: directory containing
+    :param fname_pattern: UM NetCDF diagnostic file(s) to read. will be interpreted as a glob pattern. (should belong to the same simulation)
     :param res: horizontal resolution (will use to overwrite horizontal coordinates). **NB** works for ideal simulations
     :parm  required_fields: list of fields to read and pre-process. Defaults to ['u', 'v', 'w', 'theta']
     """
     # all the fields we will need for the Cs calculations
-    simulation = read_stash_files(dir_path, fname_pattern)
+    simulation = read_stash_files(fname_pattern)
     # parse UM stash codes into variable names
     simulation = rename_variables(simulation)
 
@@ -239,9 +232,8 @@ def main() -> None:
     # read UM stasth files: data
     with timer("Read Dataset", "s"):
         simulation = data_ingest(
-            args["data_dir"],
-            f"{prefix}*[{''.join(file_codes)}]*.nc",
-            args["h_resolution"],            ,
+            args["input_files"],
+            args["h_resolution"],
             required_fields=["u", "v", "w", "theta"],
         )
     simulation = simulation.chunk(
