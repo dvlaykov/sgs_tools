@@ -120,6 +120,28 @@ def parser() -> dict[str, Any]:
         help="output directory, for storing generated plots",
     )
 
+    plotting = parser.add_argument_group("Dask parameters")
+
+    plotting.add_argument(
+        "--z_chunk_size",
+        type = int,
+        default = None,
+        help = """
+        Size of dask array chunks in the vertical direction. Should divide the total number of levels.
+        Smaller size leads to smaller memory footprint, but may penalize walltime.
+        NB:The default value has not been optimised."""
+    )
+
+
+    plotting.add_argument(
+        "--t_chunk_size",
+        type = int,
+        default = None,
+        help = """
+        Size of dask array chunks in the time direction. Should divide the total number time snapshots.
+        Smaller size leads to smaller memory footprint, but may penalize walltime.
+        NB:The default value has not been optimised."""
+    )
     # parse arguments into a dictionary
     args = vars(parser.parse_args())
 
@@ -234,6 +256,7 @@ def main() -> None:
             file_codes=args["file_codes"],
             required_fields=["u", "v", "w", "theta"],
         )
+    simulation = simulation.chunk({'z':args['z_chunk_size'], 't_0':args['t_chunk_size']})
 
     # check scales make sense
     nhoriz = min(simulation["x"].shape[0], simulation["y"].shape[0])
