@@ -171,7 +171,7 @@ def restrict_ds(ds: xr.Dataset, fields: None | Iterable[str] = None) -> xr.Datas
 
 # unify coordinates and implement correct x-spacing
 # xarray doesn't handle duplicate dimensions well, so use clunkily split-rename-merge
-def unify_coords(ds: xr.Dataset, res: int) -> xr.Dataset:
+def unify_coords(ds: xr.Dataset, res: float) -> xr.Dataset:
     """unify coordinate names
 
     implement correct x-spacing using res, assume res is given in meters

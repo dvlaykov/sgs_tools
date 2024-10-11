@@ -279,7 +279,7 @@ def main() -> None:
     with timer("Setup SGS models", "ms"):
         # setup dynamic Smagorinsky model for velocity
         smag_vel = SmagorinskyVelocityModel(
-            vel, sij, cs=1.0, dx=args["h_resolution"], tensor_dims=["c1", "c2"]
+            vel, sij, cs=1.0, dx=args["h_resolution"], tensor_dims=("c1", "c2")
         )
         dyn_smag_vel = DynamicSmagorinskyVelocityModel(smag_vel)
 
@@ -290,15 +290,15 @@ def main() -> None:
             sij,
             ctheta=1.0,
             dx=args["h_resolution"],
-            tensor_dims=["c1", "c2"],
+            tensor_dims=("c1", "c2"),
         )
         dyn_smag_theta = DynamicSmagorinskyHeatModel(smag_theta, simulation["theta"])
 
     # process for each filter scale
     with timer("Setup Cs", "s", "Setup Cs"):
-        cs_iso_at_scale = []
-        cs_diag_at_scale = []
-        ctheta_at_scale = []
+        cs_iso_at_scale_ls = []
+        cs_diag_at_scale_ls = []
+        ctheta_at_scale_ls = []
         for scale, regularization_scale in zip(
             args["filter_scales"], args["regularize_filter_scales"]
         ):
@@ -313,7 +313,7 @@ def main() -> None:
                         dyn_smag_vel, filter, regularization, ["c1", "c2"]
                     )
                     # force execution for timer logging
-                    cs_iso_at_scale.append(cs_isotropic)  # .load())
+                    cs_iso_at_scale_ls.append(cs_isotropic)  # .load())
 
                 with timer("    Cs diagonal", "s"):
                     # compute diagonal Cs for velocity
@@ -321,7 +321,7 @@ def main() -> None:
                         dyn_smag_vel, filter, regularization, ["c2"]
                     )
                     # force execution for timer logging
-                    cs_diag_at_scale.append(cs_diagonal)  # .load())
+                    cs_diag_at_scale_ls.append(cs_diagonal)  # .load())
 
                 with timer("    Cs theta isotropic", "s"):
                     # compute isotropic Cs for velocity
@@ -329,12 +329,12 @@ def main() -> None:
                         dyn_smag_theta, filter, regularization, ["c1"]
                     )
                     # force execution for timer logging
-                    ctheta_at_scale.append(ctheta)  # .load())
+                    ctheta_at_scale_ls.append(ctheta)  # .load())
 
     with timer("Collect coefficients", "s"):
-        cs_iso_at_scale = xr.concat(cs_iso_at_scale, dim="scale")
-        cs_diag_at_scale = xr.concat(cs_diag_at_scale, dim="scale")
-        ctheta_at_scale = xr.concat(ctheta_at_scale, dim="scale")
+        cs_iso_at_scale = xr.concat(cs_iso_at_scale_ls, dim="scale")
+        cs_diag_at_scale = xr.concat(cs_diag_at_scale_ls, dim="scale")
+        ctheta_at_scale = xr.concat(ctheta_at_scale_ls, dim="scale")
 
         coeff_at_scale = xr.Dataset(
             {
