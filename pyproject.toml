@@ -36,6 +36,5 @@ doc = [
     "sphinx-mdinclude",
     "pydata-sphinx-theme"
 ]
-# [tools.setuptools.package.find]
-# namespace=false
-# #exclude = "scripts"
+[project.scripts]
+cs_dynamic = "sgs_tools.scripts.CS_calculation:main"
