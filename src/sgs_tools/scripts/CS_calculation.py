@@ -1,4 +1,4 @@
-from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
+from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
 from pathlib import Path
 from typing import Any, Sequence
 
@@ -31,7 +31,7 @@ from xarray.core.types import T_Xarray
 def parser() -> dict[str, Any]:
     parser = ArgumentParser(
         description="Compute dynamic Smagorinsky coefficients as function of scale from UM NetCDF output and store them in a NetCDF files",
-        formatter_class=ArgumentDefaultsHelpFormatter
+        formatter_class=ArgumentDefaultsHelpFormatter,
     )
 
     fname = parser.add_argument_group("I/O datasets on disk")
@@ -54,9 +54,8 @@ def parser() -> dict[str, Any]:
         help="horizontal resolution (will use to overwrite horizontal coordinates). **NB** works for ideal simulations",
     )
 
-
     fname.add_argument(
-        "output_path",
+        "output_file",
         type=Path,
         help="output path, will create/overwrite existing file and create any missing intermediate directories",
     )
@@ -113,6 +112,27 @@ def parser() -> dict[str, Any]:
         help="output directory, for storing generated plots",
     )
 
+    plotting = parser.add_argument_group("Dask parameters")
+
+    plotting.add_argument(
+        "--z_chunk_size",
+        type=int,
+        default=None,
+        help="""
+        Size of dask array chunks in the vertical direction. Should divide the total number of levels.
+        Smaller size leads to smaller memory footprint, but may penalize walltime.
+        NB:The default value has not been optimised.""",
+    )
+
+    plotting.add_argument(
+        "--t_chunk_size",
+        type=int,
+        default=None,
+        help="""
+        Size of dask array chunks in the time direction. Should divide the total number time snapshots.
+        Smaller size leads to smaller memory footprint, but may penalize walltime.
+        NB:The default value has not been optimised.""",
+    )
     # parse arguments into a dictionary
     args = vars(parser.parse_args())
 
@@ -224,6 +244,9 @@ def main() -> None:
             args["h_resolution"],            ,
             required_fields=["u", "v", "w", "theta"],
         )
+    simulation = simulation.chunk(
+        {"z": args["z_chunk_size"], "t_0": args["t_chunk_size"]}
+    )
 
     # check scales make sense
     nhoriz = min(simulation["x"].shape[0], simulation["y"].shape[0])
@@ -335,8 +358,8 @@ def main() -> None:
             list(args["regularize_filter_scales"]),
         )
     # plot horizontal mean profiles
-    with timer("Plotting", "s"):
-        if args["plot_show"] or args["plot_path"] is not None:
+    if args["plot_show"] or args["plot_path"] is not None:
+        with timer("Plotting", "s"):
             if len(args["filter_scales"]) > 1:
                 row_lbl = "scale"
             else:
@@ -375,20 +398,23 @@ def main() -> None:
             )
             fig_ctheta = q.get_figure()
 
-        if args["plot_path"] is not None:
-            print(f"Saving plots to {args['plot_path']}")
-            args["plot_path"].mkdir(parents=True, exist_ok=True)
-            fig_cs.savefig(args["plot_path"] / "Cs_isotropic.png", dpi=180)
-            fig_cs_diag.savefig(args["plot_path"] / "Cs_diagonal.png", dpi=180)
-            fig_ctheta.savefig(args["plot_path"] / "Ctheta_isotropic.png", dpi=180)
+            if args["plot_path"] is not None:
+                print(f"Saving plots to {args['plot_path']}")
+                args["plot_path"].mkdir(parents=True, exist_ok=True)
+                fig_cs.savefig(args["plot_path"] / "Cs_isotropic.png", dpi=180)
+                fig_cs_diag.savefig(args["plot_path"] / "Cs_diagonal.png", dpi=180)
+                fig_ctheta.savefig(args["plot_path"] / "Ctheta_isotropic.png", dpi=180)
 
     # interactive plotting out of time
     if args["plot_show"]:
         plt.show()
 
     with timer("Write to disk", "s"):
+        output = Path(args["output_file"])
+        if output.suffix != ".nc":
+            output = Path(str(output) + ".nc")
         coeff_at_scale.to_netcdf(
-            args["output_path"], mode="w", compute=True, unlimited_dims=["t_0", "scale"]
+            output, mode="w", compute=True, unlimited_dims=["t_0", "scale"]
         )
 
 
