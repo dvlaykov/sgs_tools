@@ -63,7 +63,7 @@ def parser() -> dict[str, Any]:
 
 
     fname.add_argument(
-        "output_path",
+        "output_file",
         type=Path,
         help="output path, will create/overwrite existing file and create any missing intermediate directories",
     )
@@ -368,8 +368,8 @@ def main() -> None:
             list(args["regularize_filter_scales"]),
         )
     # plot horizontal mean profiles
-    with timer("Plotting", "s"):
-        if args["plot_show"] or args["plot_path"] is not None:
+    if args["plot_show"] or args["plot_path"] is not None:
+        with timer("Plotting", "s"):
             if len(args["filter_scales"]) > 1:
                 row_lbl = "scale"
             else:
@@ -408,20 +408,23 @@ def main() -> None:
             )
             fig_ctheta = q.get_figure()
 
-        if args["plot_path"] is not None:
-            print(f"Saving plots to {args['plot_path']}")
-            args["plot_path"].mkdir(parents=True, exist_ok=True)
-            fig_cs.savefig(args["plot_path"] / "Cs_isotropic.png", dpi=180)
-            fig_cs_diag.savefig(args["plot_path"] / "Cs_diagonal.png", dpi=180)
-            fig_ctheta.savefig(args["plot_path"] / "Ctheta_isotropic.png", dpi=180)
+            if args["plot_path"] is not None:
+                print(f"Saving plots to {args['plot_path']}")
+                args["plot_path"].mkdir(parents=True, exist_ok=True)
+                fig_cs.savefig(args["plot_path"] / "Cs_isotropic.png", dpi=180)
+                fig_cs_diag.savefig(args["plot_path"] / "Cs_diagonal.png", dpi=180)
+                fig_ctheta.savefig(args["plot_path"] / "Ctheta_isotropic.png", dpi=180)
 
     # interactive plotting out of time
     if args["plot_show"]:
         plt.show()
 
     with timer("Write to disk", "s"):
+        output = Path(args["output_file"])
+        if output.suffix != '.nc':
+            output = Path(str(output) + '.nc')
         coeff_at_scale.to_netcdf(
-            args["output_path"], mode="w", compute=True, unlimited_dims=["t_0", "scale"]
+            output, mode="w", compute=True, unlimited_dims=["t_0", "scale"]
         )
 
 
