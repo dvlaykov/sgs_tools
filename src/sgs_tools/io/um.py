@@ -69,18 +69,15 @@ field_names_dict = base_fields_dict | Water_dict | Smagorinsky_dict | dynamic_SG
 # IO
 # open datasets
 def read_stash_files(
-    base_dir: Path | str, prefix: str, file_codes: Iterable[str]
+    base_dir: Path | str, fname_pattern: str
 ) -> xr.Dataset:
     """combine a list of output Stash files
 
     :param base_dir: base directory containing all files
-    :param prefix: prefix for all filenames -- will be expanded to ``f"{prefix}_p{c}000.nc"`` with `c` from `file_codes`
-    :param file_codes: the codes used by Stash system for different output files;
-                 e.g. "r" for the main fields, we typically put SGS model diagnostics in "b"
+    :param fname_pattern: filename to read. will be interpreted as a glob pattern.
     :return: `xarray.Dataset` with all available variables
     """
 
-    fname_pattern = f"{prefix}*[{''.join(file_codes)}]*.nc"
     print(f"Reading {base_dir}/{fname_pattern}")
     # turn Path.glob() into list because of incomplete typehints of xr.open_mfdataset
     dataset = xr.open_mfdataset(list(Path(base_dir).glob(fname_pattern)), chunks={})

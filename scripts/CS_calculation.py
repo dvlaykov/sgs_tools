@@ -41,20 +41,13 @@ def parser() -> dict[str, Any]:
         help="location of UM data, recognize glob patterns, in case diagnostics are split across multiple NetCDF files",
     )
     fname.add_argument(
-        "fname_prefix",
+        "fname_pattern",
         type=str,
-        help="""Common prefix of filenames to read (should belong to the same simulation).
-                Will read files matching the glob pattern '{prefix}*[file_codes]*.nc'.""",
+        help="""UM diagnostic NetCDF filenames to read. This will be interpreted as a glob pattern. e.g. "CBL_300M*[br]*.nc"
+                (Files should belong to the same simulation).
+            """
     )
-    fname.add_argument(
-        "--file_codes",
-        type=str,
-        nargs="+",
-        default=("b", "r"),
-        help="""STASH stream file codes. Will read files matching the glob pattern '{prefix}*[file_codes}]*.nc'.
-                Expect them to contain the fields 'u', 'v', 'w', 'theta'.
-             """,
-    )
+
     fname.add_argument(
         "h_resolution",
         type=float,
@@ -148,19 +141,17 @@ def data_ingest(
     dir_path: Path,
     fname_pattern: str,
     res: float,
-    file_codes: list[str] = ["b", "r"],
     required_fields: list[str] = ["u", "v", "w", "theta"],
 ):
     """read and pre-process UM data
 
     :param dir_path: directory containing UM NetCDF files
-    :param fname_prefix: common prefix of filenames to read (should belong to the same simulation)
-    :param float: horizontal resolution (will use to overwrite horizontal coordinates). **NB** works for ideal simulations
-    :param file_codes: single-letter filename codes distinguishing diagnostic output files, default is ['b', 'r']
+    :param fname_pattern: filename(s) to read. will be interpreted as a glob pattern. (should belong to the same simulation)
+    :param res: horizontal resolution (will use to overwrite horizontal coordinates). **NB** works for ideal simulations
     :parm  required_fields: list of fields to read and pre-process. Defaults to ['u', 'v', 'w', 'theta']
     """
     # all the fields we will need for the Cs calculations
-    simulation = read_stash_files(dir_path, fname_pattern, file_codes=file_codes)
+    simulation = read_stash_files(dir_path, fname_pattern)
     # parse UM stash codes into variable names
     simulation = rename_variables(simulation)
 
@@ -229,9 +220,8 @@ def main() -> None:
     with timer("Read Dataset", "s"):
         simulation = data_ingest(
             args["data_dir"],
-            args["fname_prefix"],
-            args["h_resolution"],
-            file_codes=args["file_codes"],
+            f"{prefix}*[{''.join(file_codes)}]*.nc",
+            args["h_resolution"],            ,
             required_fields=["u", "v", "w", "theta"],
         )
 
