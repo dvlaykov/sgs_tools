@@ -1,10 +1,10 @@
 [build-system]
-requires = ["setuptools>=61"]
+requires = ["setuptools>=61", "setuptools_scm>=8"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "SGS_tools"
-version = "0.1.0"
+dynamic = ["version"]
 description = "Python tools for sub-grid scale fluid analyis"
 authors = [
     {name = "Dimtar Vlaykov", email = "d.vlaykov@exeter.ac.uk"},
@@ -41,3 +41,5 @@ doc = [
 ]
 [project.scripts]
 cs_dynamic = "sgs_tools.scripts.CS_calculation:main"
+
+[tool.setuptools_scm]
