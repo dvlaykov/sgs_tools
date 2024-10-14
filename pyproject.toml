@@ -29,10 +29,13 @@ dependencies = [
 dev = [
     "tox",
     "mypy",
-    "pytest"
+    "pytest",
+    "ruff"
 ]
 doc = [
     "sphinx",
+    "sphinx_autodoc_typehints",
+    "sphinx_argparse_cli",
     "sphinx-mdinclude",
     "pydata-sphinx-theme"
 ]
