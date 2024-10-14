@@ -1,4 +1,11 @@
 
+### Release Notes:
+* v0.0.1
+  * dynamic version
+  * fixes to packaging and dependencies
+  * upgrade IO support to xarray 2023.9
+  * clean-up of main script `CS_calculations.py` (exposed as a cli)
+
 ### Task List:
   * **Documentation** -- comlete coverage
   * **Unit testing** -- increase coverage
