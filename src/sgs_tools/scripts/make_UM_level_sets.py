@@ -2,10 +2,10 @@ from argparse import ArgumentParser
 from pathlib import Path
 from typing import Any
 
-import f90nml
+import f90nml  # type: ignore
 from numpy import linspace
-
 from sgs_tools.util.path_utils import add_extension
+
 
 def parser() -> dict[str, Any]:
     parser = ArgumentParser(
@@ -71,8 +71,9 @@ def main():
     nml.end_comma = True
     nml.float_format = ".8f"
 
-    #write
-    nml.write(args['output_file'], force=True)
+    # write
+    nml.write(args["output_file"], force=True)
+
 
 if __name__ == "__main__":
     main()
