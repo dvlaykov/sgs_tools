@@ -5,6 +5,7 @@ from typing import Any
 import f90nml
 from numpy import linspace
 
+from sgs_tools.util.path_utils import add_extension
 
 def parser() -> dict[str, Any]:
     parser = ArgumentParser(
@@ -12,9 +13,9 @@ def parser() -> dict[str, Any]:
     )
 
     parser.add_argument(
-        "out_fname",
+        "output_file",
         type=Path,
-        help="location of output file",
+        help="output path, will create/overwrite existing file and create any missing intermediate directories",
     )
 
     parser.add_argument(
@@ -35,6 +36,8 @@ def parser() -> dict[str, Any]:
     assert (
         args["z_top_of_model"] > 0
     ), f'Need a positive z_top_of_model, got {args["z_top_of_model"]}'
+
+    args["output_file"] = add_extension(args["output_file"], ".nml")
     return args
 
 
@@ -69,7 +72,7 @@ def main():
     nml.float_format = ".8f"
 
     #write
-    nml.write(args["out_fname"], force=True)
+    nml.write(args['output_file'], force=True)
 
 if __name__ == "__main__":
     main()
