@@ -2,7 +2,7 @@ Scripts:
 ========
 
 .. sphinx_argparse_cli::
-  :module:  scripts.CS_calculation
+  :module:  sgs_tools.scripts.CS_calculation
   :func: parser
   :hook:
   :prog: CS_calculation.py
