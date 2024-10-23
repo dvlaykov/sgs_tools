@@ -24,6 +24,7 @@ from sgs_tools.sgs.Smagorinsky import (
     SmagorinskyHeatModel,
     SmagorinskyVelocityModel,
 )
+from sgs_tools.util.path_utils import add_extension
 from sgs_tools.util.timer import timer
 from xarray.core.types import T_Xarray
 
@@ -148,6 +149,9 @@ def parser() -> dict[str, Any]:
         )
 
     assert len(args["filter_scales"]) == len(args["regularize_filter_scales"])
+
+    args["output_file"] = add_extension(args["output_file"], ".nc")
+
     return args
 
 
@@ -402,11 +406,8 @@ def main() -> None:
         plt.show()
 
     with timer("Write to disk", "s"):
-        output = Path(args["output_file"])
-        if output.suffix != ".nc":
-            output = Path(str(output) + ".nc")
         coeff_at_scale.to_netcdf(
-            output, mode="w", compute=True, unlimited_dims=["t_0", "scale"]
+            args["output_file"], mode="w", compute=True, unlimited_dims=["t_0", "scale"]
         )
 
 
